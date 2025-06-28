@@ -1,0 +1,45 @@
+{
+  "name": "zmk-keymap-editor",
+  "version": "0.1.0",
+  "description": "TypeScript DSL for creating ZMK keyboard firmware keymaps",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "zmk-keymap-editor": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "bun --hot ./index.ts",
+    "build": "tsgo --project tsconfig.build.json",
+    "postbuild": "chmod +x dist/cli.js",
+    "typecheck": "tsgo --noEmit",
+    "lint": "eslint .",
+    "knip": "knip",
+    "check": "concurrently \"bun typecheck\" \"bun test\" \"bun lint\" \"bun knip\"",
+    "preview": "bun run src/cli.ts preview",
+    "build:keymap": "bun run src/cli.ts build",
+    "prepare": "bun run build",
+    "prepublishOnly": "bun check && bun run build"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.17",
+    "@typescript/native-preview": "^7.0.0-dev.20250628.1",
+    "concurrently": "^9.2.0",
+    "knip": "^5.61.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.30.0",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^9.30.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-functional": "^9.0.2",
+    "eslint-plugin-unicorn": "^59.0.1",
+    "zod": "^3.25.67"
+  }
+}

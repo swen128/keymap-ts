@@ -1,0 +1,15 @@
+/**
+ * DSL (Domain Specific Language) for ZMK Keymap Configuration
+ * 
+ * This module provides the user-facing API for defining keymaps
+ * in TypeScript with full type safety.
+ */
+
+// Re-export all user-facing schemas and types
+export * from './schemas';
+
+// Re-export keyboard helpers
+export { glove80Layout, glove80Keymap } from './keyboards/glove80';
+
+// Re-export keycodes
+export { type KC } from './keycodes';
