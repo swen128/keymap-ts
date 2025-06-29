@@ -110,6 +110,7 @@ export default [
     files: ['**/cli.ts'],
     rules: {
       'no-console': 'off',
+      'functional/no-throw-statements': 'off',
     },
   },
   {
