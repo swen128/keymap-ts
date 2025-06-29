@@ -22,13 +22,14 @@
     "check": "concurrently \"bun typecheck\" \"bun test\" \"bun lint\" \"bun knip\"",
     "preview": "bun run src/cli.ts preview",
     "build:keymap": "bun run src/cli.ts build",
-    "prepare": "bun run build",
+    "prepare": "husky",
     "prepublishOnly": "bun check && bun run build"
   },
   "devDependencies": {
     "@types/bun": "^1.2.17",
     "@typescript/native-preview": "^7.0.0-dev.20250628.1",
     "concurrently": "^9.2.0",
+    "husky": "^9.1.7",
     "knip": "^5.61.3",
     "typescript": "^5.8.3"
   },
