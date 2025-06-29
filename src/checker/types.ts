@@ -25,8 +25,8 @@ import type {
 export type SimpleBinding = 
   | { behavior: 'keyPress'; code: { key: string; modifiers: string[] } }
   | { behavior: 'modTap'; mod: { key: string; modifiers: string[] }; tap: { key: string; modifiers: string[] } }
-  | { behavior: 'layerTap'; layer: string; tap: { key: string; modifiers: string[] } }
-  | { behavior: 'toLayer'; layer: string }
+  | { behavior: 'layerTap'; layer: number; tap: { key: string; modifiers: string[] } }
+  | { behavior: 'toLayer'; layer: number }
   | { behavior: 'transparent' }
   | { behavior: 'none' }
   | { behavior: 'keyToggle'; code: { key: string; modifiers: string[] } }
@@ -34,10 +34,10 @@ export type SimpleBinding =
   | { behavior: 'customStickyKey'; name: string; code: { key: string; modifiers: string[] } }
   | { behavior: 'capsWord' }
   | { behavior: 'keyRepeat' }
-  | { behavior: 'momentaryLayer'; layer: string }
-  | { behavior: 'toggleLayer'; layer: string }
-  | { behavior: 'stickyLayer'; layer: string }
-  | { behavior: 'customStickyLayer'; name: string; layer: string }
+  | { behavior: 'momentaryLayer'; layer: number }
+  | { behavior: 'toggleLayer'; layer: number }
+  | { behavior: 'stickyLayer'; layer: number }
+  | { behavior: 'customStickyLayer'; name: string; layer: number }
   | { behavior: 'macro'; macroName: string }
   | { behavior: 'mouseButton'; button: 'MB1' | 'MB2' | 'MB3' | 'MB4' | 'MB5' }
   | { behavior: 'systemReset' }

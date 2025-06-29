@@ -79,9 +79,25 @@ function emitBehaviorReference(binding: CheckedBinding): string {
     case 'holdTap': {
       const hold = emitBehaviorReference(binding.holdBinding);
       const tap = emitBehaviorReference(binding.tapBinding);
-      // For keyPress behaviors, we need just the key code without &kp
-      const holdParam = hold.startsWith('&kp ') ? hold.slice(4) : hold.slice(1);
-      const tapParam = tap.startsWith('&kp ') ? tap.slice(4) : tap.slice(1);
+      // Extract parameters from the behavior references
+      // For behaviors like &kp A, we want just "A"
+      // For macros like &__synthetic_bluetooth_0, we want "__synthetic_bluetooth_0"
+      const extractParam = (ref: string): string => {
+        if (ref.startsWith('&')) {
+          const parts = ref.split(' ');
+          if (parts.length === 1) {
+            // It's a macro reference like &__synthetic_bluetooth_0
+            return ref.substring(1);
+          } else {
+            // It's a behavior with params like &kp A or &mo 1
+            return parts.slice(1).join(' ');
+          }
+        }
+        return ref;
+      };
+      
+      const holdParam = extractParam(hold);
+      const tapParam = extractParam(tap);
       return `&${binding.name} ${holdParam} ${tapParam}`;
     }
     

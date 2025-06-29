@@ -5,15 +5,21 @@ import type { Keymap } from './dsl/schemas';
 describe('transpiler', () => {
   it('should transpile a simple keymap successfully', () => {
     const keymap: Keymap = {
-      layers: [{
-        name: 'default',
-        bindings: [
-          { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
-          { behavior: 'keyPress', code: { key: 'B', modifiers: ['LC'] } },
-          { behavior: 'transparent' },
-          { behavior: 'momentaryLayer', layer: 'nav' }
-        ]
-      }]
+      layers: [
+        {
+          name: 'default',
+          bindings: [
+            { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
+            { behavior: 'keyPress', code: { key: 'B', modifiers: ['LC'] } },
+            { behavior: 'transparent' },
+            { behavior: 'momentaryLayer', layer: 'nav' }
+          ]
+        },
+        {
+          name: 'nav',
+          bindings: []
+        }
+      ]
     };
     
     const expected = `/ {
@@ -22,7 +28,12 @@ describe('transpiler', () => {
 
     default_layer {
         bindings = <
-            &kp A &kp LC(B) &trans &mo nav
+            &kp A &kp LC(B) &trans &mo 1
+        >;
+    };
+
+    nav_layer {
+        bindings = <
         >;
     };
 

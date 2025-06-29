@@ -5,15 +5,21 @@ import { check } from './checker';
 describe('checker', () => {
   it('should convert simple bindings correctly', () => {
     const keymap: Keymap = {
-      layers: [{
-        name: 'default',
-        bindings: [
-          { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
-          { behavior: 'keyPress', code: { key: 'B', modifiers: ['LC', 'LS'] } },
-          { behavior: 'transparent' },
-          { behavior: 'momentaryLayer', layer: 'nav' }
-        ]
-      }]
+      layers: [
+        {
+          name: 'default',
+          bindings: [
+            { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
+            { behavior: 'keyPress', code: { key: 'B', modifiers: ['LC', 'LS'] } },
+            { behavior: 'transparent' },
+            { behavior: 'momentaryLayer', layer: 'nav' }
+          ]
+        },
+        {
+          name: 'nav',
+          bindings: []
+        }
+      ]
     };
     
     const result = check(keymap);
@@ -26,7 +32,7 @@ describe('checker', () => {
       { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
       { behavior: 'keyPress', code: { key: 'B', modifiers: ['LC', 'LS'] } },
       { behavior: 'transparent' },
-      { behavior: 'momentaryLayer', layer: 'nav' }
+      { behavior: 'momentaryLayer', layer: 1 }  // nav is at index 1
     ]);
     
     expect(result.keymap.macros).toHaveLength(0);
@@ -179,22 +185,28 @@ describe('checker', () => {
 
   it('should handle nested hold-taps correctly and collect nested behavior definitions', () => {
     const keymap: Keymap = {
-      layers: [{
-        name: 'default',
-        bindings: [
-          {
-            behavior: 'holdTap',
-            definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'outer_ht' },
-            holdBinding: {
+      layers: [
+        {
+          name: 'default',
+          bindings: [
+            {
               behavior: 'holdTap',
-              definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'inner_ht' },
-              holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
-              tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
-            },
-            tapBinding: { behavior: 'keyPress', code: { key: 'B', modifiers: [] } }
-          }
-        ]
-      }]
+              definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'outer_ht' },
+              holdBinding: {
+                behavior: 'holdTap',
+                definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'inner_ht' },
+                holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
+                tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
+              },
+              tapBinding: { behavior: 'keyPress', code: { key: 'B', modifiers: [] } }
+            }
+          ]
+        },
+        {
+          name: 'nav',
+          bindings: []
+        }
+      ]
     };
     
     const result = check(keymap);
@@ -298,35 +310,41 @@ describe('checker', () => {
 
   it('should collect behavior definitions correctly', () => {
     const keymap: Keymap = {
-      layers: [{
-        name: 'default',
-        bindings: [
-          {
-            behavior: 'holdTap',
-            definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 200 },
-            holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
-            tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
-          },
-          {
-            behavior: 'customStickyKey',
-            definition: { compatible: 'zmk,behavior-sticky-key' as const, name: 'my_sk', releaseAfterMs: 1000 },
-            code: { key: 'LS', modifiers: [] }
-          },
-          {
-            behavior: 'tapDance',
-            definition: { compatible: 'zmk,behavior-tap-dance' as const, name: 'td1', tappingTermMs: 250 },
-            bindings: [
-              { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
-              { behavior: 'keyPress', code: { key: 'B', modifiers: [] } },
-              {
-                behavior: 'customStickyLayer',
-                definition: { compatible: 'zmk,behavior-sticky-layer' as const, name: 'my_sl' },
-                layer: 'nav'
-              }
-            ]
-          }
-        ]
-      }],
+      layers: [
+        {
+          name: 'default',
+          bindings: [
+            {
+              behavior: 'holdTap',
+              definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 200 },
+              holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
+              tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
+            },
+            {
+              behavior: 'customStickyKey',
+              definition: { compatible: 'zmk,behavior-sticky-key' as const, name: 'my_sk', releaseAfterMs: 1000 },
+              code: { key: 'LS', modifiers: [] }
+            },
+            {
+              behavior: 'tapDance',
+              definition: { compatible: 'zmk,behavior-tap-dance' as const, name: 'td1', tappingTermMs: 250 },
+              bindings: [
+                { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
+                { behavior: 'keyPress', code: { key: 'B', modifiers: [] } },
+                {
+                  behavior: 'customStickyLayer',
+                  definition: { compatible: 'zmk,behavior-sticky-layer' as const, name: 'my_sl' },
+                  layer: 'nav'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          name: 'nav',
+          bindings: []
+        }
+      ],
       combos: [{
         name: 'test_combo',
         keyPositions: ['0', '1'],
@@ -364,25 +382,31 @@ describe('checker', () => {
 
   it('should deduplicate identical behavior definitions', () => {
     const keymap: Keymap = {
-      layers: [{
-        name: 'default',
-        bindings: [
-          // First usage of ht1 with definition
-          {
-            behavior: 'holdTap',
-            definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 200 },
-            holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
-            tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
-          },
-          // Second usage of ht1 with same definition - should be deduplicated
-          {
-            behavior: 'holdTap',
-            definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 200 },
-            holdBinding: { behavior: 'keyPress', code: { key: 'C', modifiers: [] } },
-            tapBinding: { behavior: 'keyPress', code: { key: 'D', modifiers: [] } }
-          }
-        ]
-      }]
+      layers: [
+        {
+          name: 'default',
+          bindings: [
+            // First usage of ht1 with definition
+            {
+              behavior: 'holdTap',
+              definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 200 },
+              holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
+              tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
+            },
+            // Second usage of ht1 with same definition - should be deduplicated
+            {
+              behavior: 'holdTap',
+              definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 200 },
+              holdBinding: { behavior: 'keyPress', code: { key: 'C', modifiers: [] } },
+              tapBinding: { behavior: 'keyPress', code: { key: 'D', modifiers: [] } }
+            }
+          ]
+        },
+        {
+          name: 'nav',
+          bindings: []
+        }
+      ]
     };
     
     const result = check(keymap);
@@ -403,25 +427,31 @@ describe('checker', () => {
   
   it('should fail when behavior definitions conflict', () => {
     const keymap: Keymap = {
-      layers: [{
-        name: 'default',
-        bindings: [
-          // First usage of ht1 with tappingTermMs: 200
-          {
-            behavior: 'holdTap',
-            definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 200 },
-            holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
-            tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
-          },
-          // Second usage with different tappingTermMs - this is an error
-          {
-            behavior: 'holdTap',
-            definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 300 },
-            holdBinding: { behavior: 'keyPress', code: { key: 'E', modifiers: [] } },
-            tapBinding: { behavior: 'keyPress', code: { key: 'F', modifiers: [] } }
-          }
-        ]
-      }]
+      layers: [
+        {
+          name: 'default',
+          bindings: [
+            // First usage of ht1 with tappingTermMs: 200
+            {
+              behavior: 'holdTap',
+              definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 200 },
+              holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
+              tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
+            },
+            // Second usage with different tappingTermMs - this is an error
+            {
+              behavior: 'holdTap',
+              definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht1', tappingTermMs: 300 },
+              holdBinding: { behavior: 'keyPress', code: { key: 'E', modifiers: [] } },
+              tapBinding: { behavior: 'keyPress', code: { key: 'F', modifiers: [] } }
+            }
+          ]
+        },
+        {
+          name: 'nav',
+          bindings: []
+        }
+      ]
     };
     
     const result = check(keymap);
@@ -435,40 +465,73 @@ describe('checker', () => {
     expect(result.errors[0]?.message).toContain('Behavior "ht1" has conflicting definitions');
   });
 
-  it('should collect unique bindings for behaviors used in multiple contexts', () => {
+  it('should validate layer references exist', () => {
     const keymap: Keymap = {
       layers: [{
         name: 'default',
         bindings: [
-          {
-            behavior: 'holdTap',
-            definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht_multi' },
-            holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
-            tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
-          },
-          {
-            behavior: 'holdTap',
-            definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht_multi' },
-            holdBinding: { behavior: 'toggleLayer', layer: 'fn' },
-            tapBinding: { behavior: 'modTap', mod: { key: 'LC', modifiers: [] }, tap: { key: 'B', modifiers: [] } }
-          },
-          {
-            behavior: 'tapDance',
-            definition: { compatible: 'zmk,behavior-tap-dance' as const, name: 'td_complex' },
-            bindings: [
-              { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
-              { behavior: 'stickyKey', code: { key: 'LS', modifiers: [] } },
-              { behavior: 'toLayer', layer: 'base' },
-              {
-                behavior: 'holdTap',
-                definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht_nested' },
-                holdBinding: { behavior: 'capsWord' },
-                tapBinding: { behavior: 'keyRepeat' }
-              }
-            ]
-          }
+          { behavior: 'momentaryLayer', layer: 'NonExistent' }
         ]
       }]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain('Layer "NonExistent" does not exist');
+    }
+  });
+
+  it('should collect unique bindings for behaviors used in multiple contexts', () => {
+    const keymap: Keymap = {
+      layers: [
+        {
+          name: 'default',
+          bindings: [
+            {
+              behavior: 'holdTap',
+              definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht_multi' },
+              holdBinding: { behavior: 'momentaryLayer', layer: 'nav' },
+              tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
+            },
+            {
+              behavior: 'holdTap',
+              definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht_multi' },
+              holdBinding: { behavior: 'toggleLayer', layer: 'fn' },
+              tapBinding: { behavior: 'modTap', mod: { key: 'LC', modifiers: [] }, tap: { key: 'B', modifiers: [] } }
+            },
+            {
+              behavior: 'tapDance',
+              definition: { compatible: 'zmk,behavior-tap-dance' as const, name: 'td_complex' },
+              bindings: [
+                { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
+                { behavior: 'stickyKey', code: { key: 'LS', modifiers: [] } },
+                { behavior: 'toLayer', layer: 'base' },
+                {
+                  behavior: 'holdTap',
+                  definition: { compatible: 'zmk,behavior-hold-tap' as const, name: 'ht_nested' },
+                  holdBinding: { behavior: 'capsWord' },
+                  tapBinding: { behavior: 'keyRepeat' }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          name: 'nav',
+          bindings: []
+        },
+        {
+          name: 'fn',
+          bindings: []
+        },
+        {
+          name: 'base',
+          bindings: []
+        }
+      ]
     };
     
     const result = check(keymap);

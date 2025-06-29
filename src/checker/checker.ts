@@ -82,11 +82,12 @@ function checkBinding(
   synthesizedMacros: SynthesizedMacro[],
   errors: ValidationError[],
   path: string[],
-  behaviorUsageMap: Map<string, Set<string>>
+  behaviorUsageMap: BehaviorUsageMap,
+  layerNameToIndex: LayerNameToIndexMap
 ): { binding: CheckedBinding; synthesizedMacros: SynthesizedMacro[] } {
   const newSynthesizedMacros: SynthesizedMacro[] = [];
 
-  const simpleBinding = checkSimpleBinding(binding);
+  const simpleBinding = checkSimpleBinding(binding, layerNameToIndex);
   if (simpleBinding) {
     return {
       binding: simpleBinding,
@@ -195,10 +196,10 @@ function checkBinding(
         synthesizedMacros: []
       };
     case 'holdTap': {
-      const holdResult = checkBindingForNesting(binding.holdBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap);
+      const holdResult = checkBindingForNesting(binding.holdBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
       newSynthesizedMacros.push(...holdResult.synthesizedMacros);
       
-      const tapResult = checkBindingForNesting(binding.tapBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap);
+      const tapResult = checkBindingForNesting(binding.tapBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
       newSynthesizedMacros.push(...tapResult.synthesizedMacros);
       
       // Track which behaviors this hold-tap uses
@@ -223,7 +224,7 @@ function checkBinding(
       const usedBehaviors = behaviorUsageMap.get(binding.definition.name) || new Set();
       
       binding.bindings.forEach((b: Binding) => {
-        const result = checkBindingForNesting(b, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap);
+        const result = checkBindingForNesting(b, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
         newSynthesizedMacros.push(...result.synthesizedMacros);
         checkedBindings.push(result.binding);
         usedBehaviors.add(getCheckedBindingBehaviorName(result.binding));
@@ -241,10 +242,10 @@ function checkBinding(
       };
     }
     case 'modMorph': {
-      const defaultResult = checkBindingForNesting(binding.defaultBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap);
+      const defaultResult = checkBindingForNesting(binding.defaultBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
       newSynthesizedMacros.push(...defaultResult.synthesizedMacros);
       
-      const morphedResult = checkBindingForNesting(binding.morphedBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap);
+      const morphedResult = checkBindingForNesting(binding.morphedBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
       newSynthesizedMacros.push(...morphedResult.synthesizedMacros);
       
       // Track which behaviors this mod-morph uses
@@ -278,7 +279,8 @@ function checkBinding(
 }
 
 function checkSimpleBinding(
-  binding: Binding
+  binding: Binding,
+  layerNameToIndex: LayerNameToIndexMap
 ): SimpleBinding | null {
   switch (binding.behavior) {
     case 'keyPress':
@@ -313,43 +315,61 @@ function checkSimpleBinding(
         tap: { key: binding.tap.key, modifiers: [...binding.tap.modifiers] }
       };
     
-    case 'layerTap':
+    case 'layerTap': {
+      const layerIndex = layerNameToIndex.get(binding.layer);
+      if (layerIndex === undefined) return null;
       return {
         behavior: 'layerTap',
-        layer: binding.layer,
+        layer: layerIndex,
         tap: { key: binding.tap.key, modifiers: [...binding.tap.modifiers] }
       };
+    }
     
-    case 'toLayer':
+    case 'toLayer': {
+      const layerIndex = layerNameToIndex.get(binding.layer);
+      if (layerIndex === undefined) return null;
       return {
         behavior: 'toLayer',
-        layer: binding.layer
+        layer: layerIndex
       };
+    }
     
-    case 'momentaryLayer':
+    case 'momentaryLayer': {
+      const layerIndex = layerNameToIndex.get(binding.layer);
+      if (layerIndex === undefined) return null;
       return {
         behavior: 'momentaryLayer',
-        layer: binding.layer
+        layer: layerIndex
       };
+    }
     
-    case 'toggleLayer':
+    case 'toggleLayer': {
+      const layerIndex = layerNameToIndex.get(binding.layer);
+      if (layerIndex === undefined) return null;
       return {
         behavior: 'toggleLayer',
-        layer: binding.layer
+        layer: layerIndex
       };
+    }
     
-    case 'stickyLayer':
+    case 'stickyLayer': {
+      const layerIndex = layerNameToIndex.get(binding.layer);
+      if (layerIndex === undefined) return null;
       return {
         behavior: 'stickyLayer',
-        layer: binding.layer
+        layer: layerIndex
       };
+    }
     
-    case 'customStickyLayer':
+    case 'customStickyLayer': {
+      const layerIndex = layerNameToIndex.get(binding.layer);
+      if (layerIndex === undefined) return null;
       return {
         behavior: 'customStickyLayer',
         name: binding.definition.name,
-        layer: binding.layer
+        layer: layerIndex
       };
+    }
     
     case 'transparent':
     case 'none':
@@ -390,9 +410,10 @@ function checkSimpleBinding(
 function checkBindingForNesting(
   binding: Binding,
   existingMacros: SynthesizedMacro[],
-  behaviorUsageMap: Map<string, Set<string>>
+  behaviorUsageMap: BehaviorUsageMap,
+  layerNameToIndex: LayerNameToIndexMap
 ): { binding: SimpleBinding; synthesizedMacros: SynthesizedMacro[] } {
-  const simpleBinding = checkSimpleBinding(binding);
+  const simpleBinding = checkSimpleBinding(binding, layerNameToIndex);
   
   if (simpleBinding) {
     return {
@@ -408,7 +429,7 @@ function checkBindingForNesting(
     case 'tapDance':
     case 'modMorph': {
       const errors: ValidationError[] = [];
-      const result = checkBinding(binding, existingMacros, errors, [], behaviorUsageMap);
+      const result = checkBinding(binding, existingMacros, errors, [], behaviorUsageMap, layerNameToIndex);
       // The binding will be wrapped in a synthetic macro
       const syntheticMacro = createSyntheticMacro(binding);
       return {
@@ -487,14 +508,15 @@ function checkLayer(
   layer: Layer,
   synthesizedMacros: SynthesizedMacro[],
   errors: ValidationError[],
-  behaviorUsageMap: Map<string, Set<string>>
+  behaviorUsageMap: BehaviorUsageMap,
+  layerNameToIndex: LayerNameToIndexMap
 ): { layer: CheckedLayer; synthesizedMacros: SynthesizedMacro[] } {
   const newSynthesizedMacros: SynthesizedMacro[] = [];
   const checkedBindings: CheckedBinding[] = [];
   
   layer.bindings.forEach((binding, index) => {
     const path = ['layers', layer.name, 'bindings', index.toString()];
-    const result = checkBinding(binding, [...synthesizedMacros, ...newSynthesizedMacros], errors, path, behaviorUsageMap);
+    const result = checkBinding(binding, [...synthesizedMacros, ...newSynthesizedMacros], errors, path, behaviorUsageMap, layerNameToIndex);
     newSynthesizedMacros.push(...result.synthesizedMacros);
     checkedBindings.push(result.binding);
   });
@@ -508,6 +530,12 @@ function checkLayer(
   };
 }
 
+type BehaviorName = string;
+type LayerName = string;
+type LayerIndex = number;
+type BehaviorUsageMap = Map<BehaviorName, Set<BehaviorName>>;
+type LayerNameToIndexMap = Map<LayerName, LayerIndex>;
+
 export function check(keymap: Keymap): CheckResult {
   resetSyntheticMacroCounter();
   
@@ -515,9 +543,86 @@ export function check(keymap: Keymap): CheckResult {
   const allSynthesizedMacros: SynthesizedMacro[] = [];
   const checkedLayers: CheckedLayer[] = [];
   // Map to track behavior definitions and their used behaviors
-  const behaviorUsageMap = new Map<string, Set<string>>();
+  const behaviorUsageMap: BehaviorUsageMap = new Map();
   type BaseBehaviorDef = StickyKeyDefinition | StickyLayerDefinition | HoldTapDefinition | TapDanceDefinition | ModMorphDefinition;
   const collectedBehaviorDefs = new Map<string, BaseBehaviorDef>();
+  
+  // Create a set of valid layer names for validation
+  const validLayerNames = new Set<LayerName>(keymap.layers.map(l => l.name));
+  
+  // Create a map from layer names to indices
+  const layerNameToIndex: LayerNameToIndexMap = new Map();
+  keymap.layers.forEach((layer, index) => {
+    layerNameToIndex.set(layer.name, index);
+  });
+  
+  // Validate layer references in a binding
+  function validateLayerReferences(binding: Binding, path: string[]): void {
+    switch (binding.behavior) {
+      case 'momentaryLayer':
+      case 'toggleLayer':
+      case 'stickyLayer':
+      case 'toLayer':
+        if (!validLayerNames.has(binding.layer)) {
+          errors.push({
+            path,
+            message: `Layer "${binding.layer}" does not exist`
+          });
+        }
+        break;
+      case 'customStickyLayer':
+        if (!validLayerNames.has(binding.layer)) {
+          errors.push({
+            path,
+            message: `Layer "${binding.layer}" does not exist`
+          });
+        }
+        break;
+      case 'layerTap':
+        if (!validLayerNames.has(binding.layer)) {
+          errors.push({
+            path,
+            message: `Layer "${binding.layer}" does not exist`
+          });
+        }
+        break;
+      case 'holdTap':
+        validateLayerReferences(binding.holdBinding, [...path, 'holdBinding']);
+        validateLayerReferences(binding.tapBinding, [...path, 'tapBinding']);
+        break;
+      case 'tapDance':
+        binding.bindings.forEach((b, i) => validateLayerReferences(b, [...path, 'bindings', i.toString()]));
+        break;
+      case 'modMorph':
+        validateLayerReferences(binding.defaultBinding, [...path, 'defaultBinding']);
+        validateLayerReferences(binding.morphedBinding, [...path, 'morphedBinding']);
+        break;
+      // Other behaviors don't have layer references
+      case 'keyPress':
+      case 'modTap':
+      case 'macro':
+      case 'transparent':
+      case 'none':
+      case 'keyToggle':
+      case 'stickyKey':
+      case 'customStickyKey':
+      case 'capsWord':
+      case 'keyRepeat':
+      case 'mouseButton':
+      case 'mouseMove':
+      case 'mouseScroll':
+      case 'systemReset':
+      case 'bootloader':
+      case 'bluetooth':
+      case 'output':
+      case 'rgbUnderglow':
+      case 'backlight':
+      case 'extPower':
+      case 'softOff':
+      case 'studioUnlock':
+        break;
+    }
+  }
   
   // Collect behavior definitions from bindings
   function collectBehaviorDefinitions(binding: Binding): void {
@@ -608,15 +713,21 @@ export function check(keymap: Keymap): CheckResult {
   }
   
   // Process layers
-  keymap.layers.forEach((layer) => {
-    layer.bindings.forEach(binding => collectBehaviorDefinitions(binding));
-    const result = checkLayer(layer, allSynthesizedMacros, errors, behaviorUsageMap);
+  keymap.layers.forEach((layer, layerIndex) => {
+    layer.bindings.forEach((binding, bindingIndex) => {
+      const path = ['layers', layerIndex.toString(), 'bindings', bindingIndex.toString()];
+      validateLayerReferences(binding, path);
+      collectBehaviorDefinitions(binding);
+    });
+    const result = checkLayer(layer, allSynthesizedMacros, errors, behaviorUsageMap, layerNameToIndex);
     allSynthesizedMacros.push(...result.synthesizedMacros);
     checkedLayers.push(result.layer);
   });
   
   // Process combos
-  keymap.combos?.forEach((combo) => {
+  keymap.combos?.forEach((combo, comboIndex) => {
+    const path = ['combos', comboIndex.toString(), 'binding'];
+    validateLayerReferences(combo.binding, path);
     collectBehaviorDefinitions(combo.binding);
   });
   
@@ -701,8 +812,8 @@ export function check(keymap: Keymap): CheckResult {
         
         const finalBindings = firstUsage && firstUsage.behavior === 'holdTap'
           ? [
-              getCheckedBindingBehaviorName(checkBindingForNesting(firstUsage.holdBinding, [], new Map()).binding),
-              getCheckedBindingBehaviorName(checkBindingForNesting(firstUsage.tapBinding, [], new Map()).binding)
+              getCheckedBindingBehaviorName(checkBindingForNesting(firstUsage.holdBinding, [], new Map(), layerNameToIndex).binding),
+              getCheckedBindingBehaviorName(checkBindingForNesting(firstUsage.tapBinding, [], new Map(), layerNameToIndex).binding)
             ]
           : bindingsArray; // Fallback
           

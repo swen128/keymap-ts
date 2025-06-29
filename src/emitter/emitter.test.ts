@@ -50,7 +50,7 @@ describe('emitter', () => {
           { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
           { behavior: 'keyPress', code: { key: 'B', modifiers: ['LC', 'LS'] } },
           { behavior: 'transparent' },
-          { behavior: 'momentaryLayer', layer: 'nav' }
+          { behavior: 'momentaryLayer', layer: 1 }
         ]
       }],
       macros: [],
@@ -65,7 +65,7 @@ describe('emitter', () => {
 
     default_layer {
         bindings = <
-            &kp A &kp LC(LS(B)) &trans &mo nav
+            &kp A &kp LC(LS(B)) &trans &mo 1
         >;
     };
 
@@ -225,6 +225,124 @@ describe('emitter', () => {
     default_layer {
         bindings = <
             &hm LSHFT A
+        >;
+    };
+
+  };
+};`;
+    
+    const output = emit(keymap);
+    expect(output).toBe(expected);
+  });
+
+  it('should emit hold-tap with momentary layer correctly', () => {
+    const keymap: CheckedKeymap = {
+      layers: [
+        {
+          name: 'default',
+          bindings: [
+            {
+              behavior: 'holdTap',
+              name: 'lt_num',
+              holdBinding: { behavior: 'momentaryLayer', layer: 1 },
+              tapBinding: { behavior: 'keyPress', code: { key: 'D', modifiers: [] } }
+            }
+          ]
+        },
+        {
+          name: 'Number',
+          bindings: []
+        }
+      ],
+      macros: [],
+      behaviors: [{
+        compatible: 'zmk,behavior-hold-tap',
+        name: 'lt_num',
+        tappingTermMs: 170,
+        bindings: ['mo', 'kp']
+      }],
+      combos: [],
+      conditionalLayers: []
+    };
+    
+    const expected = `/ {
+  behaviors {
+    lt_num: lt_num {
+        compatible = "zmk,behavior-hold-tap";
+        label = "LT_NUM";
+        #binding-cells = <2>;
+        bindings = <&mo>, <&kp>;
+        tapping-term-ms = <170>;
+    };
+
+  };
+
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+            &lt_num 1 D
+        >;
+    };
+
+    Number_layer {
+        bindings = <
+        >;
+    };
+
+  };
+};`;
+    
+    const output = emit(keymap);
+    expect(output).toBe(expected);
+  });
+
+  it('should convert layer names to indices for all layer behaviors', () => {
+    const keymap: CheckedKeymap = {
+      layers: [
+        {
+          name: 'base',
+          bindings: [
+            { behavior: 'momentaryLayer', layer: 1 },
+            { behavior: 'toggleLayer', layer: 2 },
+            { behavior: 'stickyLayer', layer: 3 },
+            { behavior: 'toLayer', layer: 0 },
+            { behavior: 'layerTap', layer: 1, tap: { key: 'SPACE', modifiers: [] } }
+          ]
+        },
+        { name: 'nav', bindings: [] },
+        { name: 'num', bindings: [] },
+        { name: 'sym', bindings: [] }
+      ],
+      macros: [],
+      behaviors: [],
+      combos: [],
+      conditionalLayers: []
+    };
+    
+    const expected = `/ {
+  keymap {
+    compatible = "zmk,keymap";
+
+    base_layer {
+        bindings = <
+            &mo 1 &tog 2 &sl 3 &to 0 &lt 1 SPACE
+        >;
+    };
+
+    nav_layer {
+        bindings = <
+        >;
+    };
+
+    num_layer {
+        bindings = <
+        >;
+    };
+
+    sym_layer {
+        bindings = <
         >;
     };
 
@@ -466,10 +584,10 @@ describe('emitter', () => {
           { behavior: 'keyToggle', code: { key: 'CAPS', modifiers: [] } },
           { behavior: 'stickyKey', code: { key: 'LSHFT', modifiers: [] } },
           { behavior: 'modTap', mod: { key: 'LCTRL', modifiers: [] }, tap: { key: 'ESC', modifiers: [] } },
-          { behavior: 'layerTap', layer: 'nav', tap: { key: 'SPC', modifiers: [] } },
-          { behavior: 'toLayer', layer: 'gaming' },
-          { behavior: 'toggleLayer', layer: 'fn' },
-          { behavior: 'stickyLayer', layer: 'sym' },
+          { behavior: 'layerTap', layer: 1, tap: { key: 'SPC', modifiers: [] } },
+          { behavior: 'toLayer', layer: 2 },
+          { behavior: 'toggleLayer', layer: 3 },
+          { behavior: 'stickyLayer', layer: 4 },
           { behavior: 'none' },
           { behavior: 'capsWord' },
           { behavior: 'keyRepeat' },
@@ -551,7 +669,7 @@ describe('emitter', () => {
 
     default_layer {
         bindings = <
-            &kt CAPS &sk LSHFT &mt LCTRL ESC &lt nav SPC &to gaming &tog fn &sl sym &none &caps_word &key_repeat
+            &kt CAPS &sk LSHFT &mt LCTRL ESC &lt 1 SPC &to 2 &tog 3 &sl 4 &none &caps_word &key_repeat
             &mkp MB1 &mmv MOVE_X(10) MOVE_Y(-5) &msc SCRL_X(0) SCRL_Y(1) &sys_reset &bootloader &bt BT_CLR &out OUT_TOG &rgb_ug RGB_COLOR_HSB 128 100 50 &bl BL_SET 75 &ext_power EP_TOG
             &soft_off 5000 &studio_unlock
         >;
