@@ -77,7 +77,7 @@ describe('checker', () => {
     expect(result.keymap.behaviors[0]).toEqual({
       compatible: 'zmk,behavior-hold-tap',
       name: 'my_ht',
-      bindings: ['__synthetic_bluetooth_0', 'kp']  // bluetooth wrapped in macro, kp for keyPress
+      bindings: ['__synthetic_bluetooth_1', 'kp']  // bluetooth wrapped in macro, kp for keyPress
     });
   });
 
@@ -482,13 +482,12 @@ describe('checker', () => {
     const tdComplex = result.keymap.behaviors.find(b => b.name === 'td_complex');
     const htNested = result.keymap.behaviors.find(b => b.name === 'ht_nested');
     
-    // ht_multi should have collected all unique behaviors from both usages
+    // ht_multi should have exactly 2 behaviors (hold-tap always has exactly 2)
     expect(htMulti).toBeDefined();
     if (htMulti && htMulti.compatible === 'zmk,behavior-hold-tap') {
-      expect(htMulti.bindings).toContain('mo');  // momentaryLayer
-      expect(htMulti.bindings).toContain('kp');  // keyPress
-      expect(htMulti.bindings).toContain('tog'); // toggleLayer
-      expect(htMulti.bindings).toContain('mt');  // modTap
+      expect(htMulti.bindings).toHaveLength(2);
+      expect(htMulti.bindings[0]).toBe('mo');  // First usage: hold is momentaryLayer
+      expect(htMulti.bindings[1]).toBe('kp');  // First usage: tap is keyPress
     }
     
     // td_complex should have all behaviors used in tap-dance

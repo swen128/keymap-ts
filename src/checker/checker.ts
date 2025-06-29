@@ -693,30 +693,20 @@ export function check(keymap: Keymap): CheckResult {
     
     switch (def.compatible) {
       case 'zmk,behavior-hold-tap': {
-        // For hold-tap, we need to get the behaviors in the correct order
+        // For hold-tap, we need to ensure exactly 2 behaviors in the bindings array
         // Find the first instance to get the order
-        let holdBehavior: string | undefined;
-        let tapBehavior: string | undefined;
+        const firstUsage = keymap.layers
+          .flatMap(layer => layer.bindings)
+          .find(binding => binding.behavior === 'holdTap' && binding.definition?.name === name);
         
-        keymap.layers.some(layer => {
-          return layer.bindings.some(binding => {
-            if (binding.behavior === 'holdTap' && binding.definition?.name === name) {
-              const holdBinding = checkBindingForNesting(binding.holdBinding, [], new Map()).binding;
-              const tapBinding = checkBindingForNesting(binding.tapBinding, [], new Map()).binding;
-              holdBehavior = getCheckedBindingBehaviorName(holdBinding);
-              tapBehavior = getCheckedBindingBehaviorName(tapBinding);
-              return true; // Stop searching
-            }
-            return false;
-          });
-        });
-        
-        // Use the ordered behaviors if found, otherwise fall back to sorted array
-        const orderedBindings = holdBehavior && tapBehavior && bindingsArray.includes(holdBehavior) && bindingsArray.includes(tapBehavior)
-          ? [holdBehavior, tapBehavior, ...bindingsArray.filter(b => b !== holdBehavior && b !== tapBehavior)]
-          : bindingsArray;
+        const finalBindings = firstUsage && firstUsage.behavior === 'holdTap'
+          ? [
+              getCheckedBindingBehaviorName(checkBindingForNesting(firstUsage.holdBinding, [], new Map()).binding),
+              getCheckedBindingBehaviorName(checkBindingForNesting(firstUsage.tapBinding, [], new Map()).binding)
+            ]
+          : bindingsArray; // Fallback
           
-        const extendedDef: CheckedHoldTapDefinition = { ...def, bindings: orderedBindings };
+        const extendedDef: CheckedHoldTapDefinition = { ...def, bindings: finalBindings };
         behaviorDefinitions.push(extendedDef);
         return;
       }

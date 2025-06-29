@@ -219,7 +219,7 @@ describe('transpiler', () => {
         compatible = "zmk,behavior-hold-tap";
         label = "HM";
         #binding-cells = <2>;
-        bindings = <&__synthetic_bluetooth_0>, <&kp>;
+        bindings = <&__synthetic_bluetooth_1>, <&kp>;
         tapping-term-ms = <200>;
     };
 
