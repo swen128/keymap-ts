@@ -5,3 +5,6 @@ dist/
 
 docs/zmk/
 
+# Playground directory for testing
+playground/
+
