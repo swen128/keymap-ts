@@ -693,7 +693,30 @@ export function check(keymap: Keymap): CheckResult {
     
     switch (def.compatible) {
       case 'zmk,behavior-hold-tap': {
-        const extendedDef: CheckedHoldTapDefinition = { ...def, bindings: bindingsArray };
+        // For hold-tap, we need to get the behaviors in the correct order
+        // Find the first instance to get the order
+        let holdBehavior: string | undefined;
+        let tapBehavior: string | undefined;
+        
+        keymap.layers.some(layer => {
+          return layer.bindings.some(binding => {
+            if (binding.behavior === 'holdTap' && binding.definition?.name === name) {
+              const holdBinding = checkBindingForNesting(binding.holdBinding, [], new Map()).binding;
+              const tapBinding = checkBindingForNesting(binding.tapBinding, [], new Map()).binding;
+              holdBehavior = getCheckedBindingBehaviorName(holdBinding);
+              tapBehavior = getCheckedBindingBehaviorName(tapBinding);
+              return true; // Stop searching
+            }
+            return false;
+          });
+        });
+        
+        // Use the ordered behaviors if found, otherwise fall back to sorted array
+        const orderedBindings = holdBehavior && tapBehavior && bindingsArray.includes(holdBehavior) && bindingsArray.includes(tapBehavior)
+          ? [holdBehavior, tapBehavior, ...bindingsArray.filter(b => b !== holdBehavior && b !== tapBehavior)]
+          : bindingsArray;
+          
+        const extendedDef: CheckedHoldTapDefinition = { ...def, bindings: orderedBindings };
         behaviorDefinitions.push(extendedDef);
         return;
       }

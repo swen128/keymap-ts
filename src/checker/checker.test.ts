@@ -397,7 +397,7 @@ describe('checker', () => {
       compatible: 'zmk,behavior-hold-tap',
       name: 'ht1',
       tappingTermMs: 200,
-      bindings: ['kp', 'mo']  // kp and mo from both usages
+      bindings: ['mo', 'kp']  // hold behavior (mo) first, tap behavior (kp) second
     });
   });
   
