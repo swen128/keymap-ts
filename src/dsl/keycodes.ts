@@ -53,8 +53,15 @@ export type KC =
   | 'ESCAPE' | 'ESC' | 'PRINTSCREEN' | 'PSCRN' | 'PAUSE_BREAK' | 'PAUSE' | 'INSERT' | 'INS'
   
   // Media keys
-  | 'VOLUME_UP' | 'VOL_UP' | 'VOLUME_DOWN' | 'VOL_DN' | 'MUTE'
-  | 'PLAY_PAUSE' | 'PP' | 'NEXT_TRACK' | 'NEXT' | 'PREVIOUS_TRACK' | 'PREV' | 'STOP'
+  | 'VOLUME_UP' | 'VOL_UP' | 'C_VOL_UP' | 'VOLUME_DOWN' | 'VOL_DN' | 'C_VOL_DN' | 'MUTE' | 'C_MUTE'
+  | 'PLAY_PAUSE' | 'PP' | 'C_PP' | 'PLAY' | 'C_PLAY' | 'NEXT_TRACK' | 'NEXT' | 'C_NEXT' | 'PREVIOUS_TRACK' | 'PREV' | 'C_PREV' | 'STOP' | 'C_STOP'
+  | 'EJECT' | 'C_EJECT' | 'C_MEDIA_HOME'
+  
+  // Brightness controls
+  | 'C_BRI_UP' | 'C_BRI_DN' | 'C_BRI_MIN' | 'C_BRI_MAX' | 'C_BRI_AUTO'
+  
+  // Application keys
+  | 'C_AL_FILES' | 'K_CALC' | 'K_WWW'
   
   // Keypad
   | 'KP_ASTERISK' | 'KP_PLUS' | 'KP_MINUS' | 'KP_SLASH' | 'KP_ENTER'

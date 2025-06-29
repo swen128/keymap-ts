@@ -81,6 +81,9 @@ export const HoldTapDefinitionSchema = z.object({
   quickTapMs: z.number().optional(),
   retro: z.boolean().optional(),
   holdWhileUndecided: z.boolean().optional(),
+  flavor: z.enum(['hold-preferred', 'balanced', 'tap-preferred', 'tap-unless-interrupted']).optional(),
+  requirePriorIdleMs: z.number().optional(),
+  holdTriggerKeyPositions: z.array(z.number()).optional(),
 });
 export type HoldTapDefinition = z.infer<typeof HoldTapDefinitionSchema>;
 
@@ -185,7 +188,7 @@ export type Bootloader = z.infer<typeof BootloaderSchema>;
 
 export const BluetoothActionSchema = z.object({
   behavior: z.literal('bluetooth'),
-  action: z.enum(['BT_SEL', 'BT_CLR', 'BT_NXT', 'BT_PRV', 'BT_DISC']),
+  action: z.enum(['BT_SEL', 'BT_CLR', 'BT_NXT', 'BT_PRV', 'BT_DISC', 'BT_CLR_ALL']),
   profile: z.number().optional(),
 });
 export type BluetoothAction = z.infer<typeof BluetoothActionSchema>;
@@ -198,7 +201,7 @@ export type OutputSelection = z.infer<typeof OutputSelectionSchema>;
 
 export const RgbUnderglowSchema = z.object({
   behavior: z.literal('rgbUnderglow'),
-  action: z.enum(['RGB_ON', 'RGB_OFF', 'RGB_TOG', 'RGB_HUI', 'RGB_HUD', 'RGB_SAI', 'RGB_SAD', 'RGB_BRI', 'RGB_BRD', 'RGB_SPI', 'RGB_SPD', 'RGB_EFF', 'RGB_EFR', 'RGB_COLOR_HSB']),
+  action: z.enum(['RGB_ON', 'RGB_OFF', 'RGB_TOG', 'RGB_HUI', 'RGB_HUD', 'RGB_SAI', 'RGB_SAD', 'RGB_BRI', 'RGB_BRD', 'RGB_SPI', 'RGB_SPD', 'RGB_EFF', 'RGB_EFR', 'RGB_COLOR_HSB', 'RGB_STATUS']),
   hue: z.number().optional(),
   saturation: z.number().optional(),
   brightness: z.number().optional(),
@@ -341,19 +344,37 @@ export const MacroControlActionSchema = z.discriminatedUnion('type', [
 ]);
 export type MacroControlAction = z.infer<typeof MacroControlActionSchema>;
 
-export const MacroActionSchema = z.discriminatedUnion('type', [
+export type MacroBehaviorAction = {
+  type: 'behavior';
+  binding: Binding;
+};
+
+export const MacroBehaviorActionSchema: z.ZodType<MacroBehaviorAction> = z.object({
+  type: z.literal('behavior'),
+  binding: z.lazy(() => BindingSchema),
+});
+
+export type MacroAction = 
+  | MacroTapAction 
+  | MacroPressAction 
+  | MacroReleaseAction 
+  | MacroWaitAction 
+  | MacroControlAction
+  | MacroBehaviorAction;
+
+export const MacroActionSchema: z.ZodType<MacroAction> = z.lazy(() => z.union([
   MacroTapActionSchema,
   MacroPressActionSchema,
   MacroReleaseActionSchema,
   MacroWaitActionSchema,
+  MacroBehaviorActionSchema,
   ...MacroControlActionSchema.options,
-]);
-export type MacroAction = z.infer<typeof MacroActionSchema>;
+]));
 
 export const MacroDefinitionSchema = z.object({
   name: z.string(),
   label: z.string().optional(),
-  bindings: z.array(MacroActionSchema),
+  bindings: z.array(z.lazy(() => MacroActionSchema)),
   waitMs: z.number().optional(),
   tapMs: z.number().optional(),
 });

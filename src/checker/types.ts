@@ -57,7 +57,7 @@ export type CheckedBinding =
   | { behavior: 'mouseScroll'; x?: number; y?: number; continuousScroll?: boolean; delay?: number; acceleration?: number }
   | { behavior: 'systemReset' }
   | { behavior: 'bootloader' }
-  | { behavior: 'bluetooth'; action: 'BT_SEL' | 'BT_CLR' | 'BT_NXT' | 'BT_PRV' | 'BT_DISC'; profile?: number }
+  | { behavior: 'bluetooth'; action: 'BT_SEL' | 'BT_CLR' | 'BT_NXT' | 'BT_PRV' | 'BT_DISC' | 'BT_CLR_ALL'; profile?: number }
   | { behavior: 'output'; target: 'OUT_USB' | 'OUT_BLE' | 'OUT_TOG' }
   | { behavior: 'rgbUnderglow'; action: string; hue?: number; saturation?: number; brightness?: number }
   | { behavior: 'backlight'; action: string; brightness?: number }

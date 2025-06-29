@@ -13,3 +13,6 @@ export { glove80Layout, glove80Keymap } from './keyboards/glove80';
 
 // Re-export keycodes
 export { type KC } from './keycodes';
+
+// Re-export helper functions
+export * from './helpers';

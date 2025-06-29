@@ -119,15 +119,79 @@ function checkBinding(
         synthesizedMacros: []
       };
     case 'bluetooth':
+      return {
+        binding: {
+          behavior: 'bluetooth',
+          action: binding.action,
+          ...(binding.profile !== undefined && { profile: binding.profile })
+        },
+        synthesizedMacros: []
+      };
     case 'output':
+      return {
+        binding: {
+          behavior: 'output',
+          target: binding.target
+        },
+        synthesizedMacros: []
+      };
     case 'rgbUnderglow':
+      return {
+        binding: {
+          behavior: 'rgbUnderglow',
+          action: binding.action,
+          ...(binding.hue !== undefined && { hue: binding.hue }),
+          ...(binding.saturation !== undefined && { saturation: binding.saturation }),
+          ...(binding.brightness !== undefined && { brightness: binding.brightness })
+        },
+        synthesizedMacros: []
+      };
     case 'backlight':
+      return {
+        binding: {
+          behavior: 'backlight',
+          action: binding.action,
+          ...(binding.brightness !== undefined && { brightness: binding.brightness })
+        },
+        synthesizedMacros: []
+      };
     case 'extPower':
+      return {
+        binding: {
+          behavior: 'extPower',
+          action: binding.action
+        },
+        synthesizedMacros: []
+      };
     case 'softOff':
+      return {
+        binding: {
+          behavior: 'softOff',
+          ...(binding.holdTimeMs !== undefined && { holdTimeMs: binding.holdTimeMs })
+        },
+        synthesizedMacros: []
+      };
     case 'mouseMove':
+      return {
+        binding: {
+          behavior: 'mouseMove',
+          ...(binding.x !== undefined && { x: binding.x }),
+          ...(binding.y !== undefined && { y: binding.y }),
+          ...(binding.delay !== undefined && { delay: binding.delay }),
+          ...(binding.acceleration !== undefined && { acceleration: binding.acceleration })
+        },
+        synthesizedMacros: []
+      };
     case 'mouseScroll':
       return {
-        binding: binding,
+        binding: {
+          behavior: 'mouseScroll',
+          ...(binding.x !== undefined && { x: binding.x }),
+          ...(binding.y !== undefined && { y: binding.y }),
+          ...(binding.continuousScroll !== undefined && { continuousScroll: binding.continuousScroll }),
+          ...(binding.delay !== undefined && { delay: binding.delay }),
+          ...(binding.acceleration !== undefined && { acceleration: binding.acceleration })
+        },
         synthesizedMacros: []
       };
     case 'holdTap': {
@@ -158,7 +222,7 @@ function checkBinding(
       
       const usedBehaviors = behaviorUsageMap.get(binding.definition.name) || new Set();
       
-      binding.bindings.forEach((b) => {
+      binding.bindings.forEach((b: Binding) => {
         const result = checkBindingForNesting(b, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap);
         newSynthesizedMacros.push(...result.synthesizedMacros);
         checkedBindings.push(result.binding);
@@ -495,7 +559,7 @@ export function check(keymap: Keymap): CheckResult {
         } else {
           collectedBehaviorDefs.set(binding.definition.name, binding.definition);
         }
-        binding.bindings.forEach(b => collectBehaviorDefinitions(b));
+        binding.bindings.forEach((b: Binding) => collectBehaviorDefinitions(b));
         break;
       }
       case 'modMorph': {
