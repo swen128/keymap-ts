@@ -5,44 +5,44 @@ import type {
   CheckedLayer,
   ExtendedMacroAction
 } from '../checker/types';
-import type {Binding, Combo, ConditionalLayer} from '../dsl/schemas';
+import type {Binding, Combo, ConditionalLayer, KeyWithModifiers} from '../dsl/schemas';
 
 /**
  * Emits ZMK devicetree format from a checked keymap
  */
 
-function formatKeyWithModifiers(key: string, modifiers: string[]): string {
-  if (modifiers.length === 0) {
-    return key;
+function formatKeyWithModifiers(code: KeyWithModifiers): string {
+  if (code.modifiers.length === 0) {
+    return code.key;
   }
   // Sort modifiers for consistent output
-  const sortedModifiers = [...modifiers].sort();
+  const sortedModifiers = [...code.modifiers].sort();
   // Nest modifiers in reverse order: LC(LS(A))
-  return sortedModifiers.reduceRight((acc, mod) => `${mod}(${acc})`, key);
+  return sortedModifiers.reduceRight((acc, mod) => `${mod}(${acc})`, code.key);
 }
 
 function emitBehaviorReference(binding: CheckedBinding): string {
   switch (binding.behavior) {
     case 'keyPress':
-      return `&kp ${formatKeyWithModifiers(binding.code.key, binding.code.modifiers)}`;
+      return `&kp ${formatKeyWithModifiers(binding.code)}`;
     
     case 'keyToggle':
-      return `&kt ${formatKeyWithModifiers(binding.code.key, binding.code.modifiers)}`;
+      return `&kt ${formatKeyWithModifiers(binding.code)}`;
     
     case 'stickyKey':
-      return `&sk ${formatKeyWithModifiers(binding.code.key, binding.code.modifiers)}`;
+      return `&sk ${formatKeyWithModifiers(binding.code)}`;
     
     case 'customStickyKey':
-      return `&${binding.name} ${formatKeyWithModifiers(binding.code.key, binding.code.modifiers)}`;
+      return `&${binding.name} ${formatKeyWithModifiers(binding.code)}`;
     
     case 'modTap': {
-      const mod = formatKeyWithModifiers(binding.mod.key, binding.mod.modifiers);
-      const tap = formatKeyWithModifiers(binding.tap.key, binding.tap.modifiers);
+      const mod = formatKeyWithModifiers(binding.mod);
+      const tap = formatKeyWithModifiers(binding.tap);
       return `&mt ${mod} ${tap}`;
     }
     
     case 'layerTap': {
-      const tap = formatKeyWithModifiers(binding.tap.key, binding.tap.modifiers);
+      const tap = formatKeyWithModifiers(binding.tap);
       return `&lt ${binding.layer} ${tap}`;
     }
     
@@ -222,7 +222,7 @@ function emitBindingReference(binding: Binding): string {
     case 'mouseScroll':
       return `&msc SCRL_X(${binding.x ?? 0}) SCRL_Y(${binding.y ?? 0})`;
     case 'keyPress':
-      return `&kp ${formatKeyWithModifiers(binding.code.key, binding.code.modifiers)}`;
+      return `&kp ${formatKeyWithModifiers(binding.code)}`;
     case 'transparent':
       return '&trans';
     case 'none':
@@ -236,18 +236,18 @@ function emitBindingReference(binding: Binding): string {
     case 'studioUnlock':
       return '&studio_unlock';
     case 'keyToggle':
-      return `&kt ${formatKeyWithModifiers(binding.code.key, binding.code.modifiers)}`;
+      return `&kt ${formatKeyWithModifiers(binding.code)}`;
     case 'stickyKey':
-      return `&sk ${formatKeyWithModifiers(binding.code.key, binding.code.modifiers)}`;
+      return `&sk ${formatKeyWithModifiers(binding.code)}`;
     case 'customStickyKey':
-      return `&${binding.definition.name} ${formatKeyWithModifiers(binding.code.key, binding.code.modifiers)}`;
+      return `&${binding.definition.name} ${formatKeyWithModifiers(binding.code)}`;
     case 'modTap': {
-      const mod = formatKeyWithModifiers(binding.mod.key, binding.mod.modifiers);
-      const tap = formatKeyWithModifiers(binding.tap.key, binding.tap.modifiers);
+      const mod = formatKeyWithModifiers(binding.mod);
+      const tap = formatKeyWithModifiers(binding.tap);
       return `&mt ${mod} ${tap}`;
     }
     case 'layerTap': {
-      const tap = formatKeyWithModifiers(binding.tap.key, binding.tap.modifiers);
+      const tap = formatKeyWithModifiers(binding.tap);
       return `&lt ${binding.layer} ${tap}`;
     }
     case 'toLayer':
@@ -283,13 +283,13 @@ function emitMacroAction(action: ExtendedMacroAction): string {
       return `<${emitBindingReference(action.binding)}>`;
     
     case 'tap':
-      return `<&kp ${formatKeyWithModifiers(action.code.key, action.code.modifiers)}>`;
+      return `<&kp ${formatKeyWithModifiers(action.code)}>`;
     
     case 'press':
-      return `<&macro_press &kp ${formatKeyWithModifiers(action.code.key, action.code.modifiers)}>`;
+      return `<&macro_press &kp ${formatKeyWithModifiers(action.code)}>`;
     
     case 'release':
-      return `<&macro_release &kp ${formatKeyWithModifiers(action.code.key, action.code.modifiers)}>`;
+      return `<&macro_release &kp ${formatKeyWithModifiers(action.code)}>`;
     
     case 'wait':
       return `<&macro_wait_time ${action.ms}>`;

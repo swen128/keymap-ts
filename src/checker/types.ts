@@ -15,7 +15,8 @@ import type {
   Combo, 
   ConditionalLayer, 
   MacroDefinition,
-  MacroAction
+  MacroAction,
+  KeyWithModifiers
 } from '../dsl/schemas.ts';
 
 /**
@@ -23,15 +24,15 @@ import type {
  * These must have arity 0 or 1.
  */
 export type SimpleBinding = 
-  | { behavior: 'keyPress'; code: { key: string; modifiers: string[] } }
-  | { behavior: 'modTap'; mod: { key: string; modifiers: string[] }; tap: { key: string; modifiers: string[] } }
-  | { behavior: 'layerTap'; layer: number; tap: { key: string; modifiers: string[] } }
+  | { behavior: 'keyPress'; code: KeyWithModifiers }
+  | { behavior: 'modTap'; mod: KeyWithModifiers; tap: KeyWithModifiers }
+  | { behavior: 'layerTap'; layer: number; tap: KeyWithModifiers }
   | { behavior: 'toLayer'; layer: number }
   | { behavior: 'transparent' }
   | { behavior: 'none' }
-  | { behavior: 'keyToggle'; code: { key: string; modifiers: string[] } }
-  | { behavior: 'stickyKey'; code: { key: string; modifiers: string[] } }
-  | { behavior: 'customStickyKey'; name: string; code: { key: string; modifiers: string[] } }
+  | { behavior: 'keyToggle'; code: KeyWithModifiers }
+  | { behavior: 'stickyKey'; code: KeyWithModifiers }
+  | { behavior: 'customStickyKey'; name: string; code: KeyWithModifiers }
   | { behavior: 'capsWord' }
   | { behavior: 'keyRepeat' }
   | { behavior: 'momentaryLayer'; layer: number }
