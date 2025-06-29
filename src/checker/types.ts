@@ -16,7 +16,10 @@ import type {
   ConditionalLayer, 
   MacroDefinition,
   MacroAction,
-  KeyWithModifiers
+  KeyWithModifiers,
+  MouseButtonType,
+  BluetoothActionType,
+  OutputTargetType
 } from '../dsl/schemas.ts';
 
 /**
@@ -40,7 +43,7 @@ export type SimpleBinding =
   | { behavior: 'stickyLayer'; layer: number }
   | { behavior: 'customStickyLayer'; name: string; layer: number }
   | { behavior: 'macro'; macroName: string }
-  | { behavior: 'mouseButton'; button: 'MB1' | 'MB2' | 'MB3' | 'MB4' | 'MB5' }
+  | { behavior: 'mouseButton'; button: MouseButtonType }
   | { behavior: 'systemReset' }
   | { behavior: 'bootloader' }
   | { behavior: 'studioUnlock' };
@@ -53,13 +56,13 @@ export type CheckedBinding =
   | { behavior: 'holdTap'; name: string; tapBinding: SimpleBinding; holdBinding: SimpleBinding }
   | { behavior: 'tapDance'; name: string; bindings: SimpleBinding[] }
   | { behavior: 'modMorph'; name: string; defaultBinding: SimpleBinding; morphedBinding: SimpleBinding; mods: string[] }
-  | { behavior: 'mouseButton'; button: 'MB1' | 'MB2' | 'MB3' | 'MB4' | 'MB5' }
+  | { behavior: 'mouseButton'; button: MouseButtonType }
   | { behavior: 'mouseMove'; x?: number; y?: number; delay?: number; acceleration?: number }
   | { behavior: 'mouseScroll'; x?: number; y?: number; continuousScroll?: boolean; delay?: number; acceleration?: number }
   | { behavior: 'systemReset' }
   | { behavior: 'bootloader' }
-  | { behavior: 'bluetooth'; action: 'BT_SEL' | 'BT_CLR' | 'BT_NXT' | 'BT_PRV' | 'BT_DISC' | 'BT_CLR_ALL'; profile?: number }
-  | { behavior: 'output'; target: 'OUT_USB' | 'OUT_BLE' | 'OUT_TOG' }
+  | { behavior: 'bluetooth'; action: BluetoothActionType; profile?: number }
+  | { behavior: 'output'; target: OutputTargetType }
   | { behavior: 'rgbUnderglow'; action: string; hue?: number; saturation?: number; brightness?: number }
   | { behavior: 'backlight'; action: string; brightness?: number }
   | { behavior: 'extPower'; action: string }

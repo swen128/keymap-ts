@@ -3,6 +3,25 @@ import {z} from 'zod/v4';
 export const PlainKeyCodeSchema = z.string();
 export type PlainKeyCode = z.infer<typeof PlainKeyCodeSchema>;
 
+// Common enums used across multiple schemas
+export const MouseButtonTypeSchema = z.enum(['MB1', 'MB2', 'MB3', 'MB4', 'MB5', 'LCLK', 'RCLK', 'MCLK']);
+export type MouseButtonType = z.infer<typeof MouseButtonTypeSchema>;
+
+export const BluetoothActionTypeSchema = z.enum(['BT_SEL', 'BT_CLR', 'BT_NXT', 'BT_PRV', 'BT_DISC', 'BT_CLR_ALL']);
+export type BluetoothActionType = z.infer<typeof BluetoothActionTypeSchema>;
+
+export const OutputTargetTypeSchema = z.enum(['OUT_USB', 'OUT_BLE', 'OUT_TOG']);
+export type OutputTargetType = z.infer<typeof OutputTargetTypeSchema>;
+
+export const RgbActionTypeSchema = z.enum(['RGB_ON', 'RGB_OFF', 'RGB_TOG', 'RGB_HUI', 'RGB_HUD', 'RGB_SAI', 'RGB_SAD', 'RGB_BRI', 'RGB_BRD', 'RGB_SPI', 'RGB_SPD', 'RGB_EFF', 'RGB_EFR', 'RGB_COLOR_HSB', 'RGB_STATUS']);
+export type RgbActionType = z.infer<typeof RgbActionTypeSchema>;
+
+export const BacklightActionTypeSchema = z.enum(['BL_ON', 'BL_OFF', 'BL_TOG', 'BL_INC', 'BL_DEC', 'BL_CYCLE', 'BL_SET']);
+export type BacklightActionType = z.infer<typeof BacklightActionTypeSchema>;
+
+export const ExtPowerActionTypeSchema = z.enum(['EP_ON', 'EP_OFF', 'EP_TOG']);
+export type ExtPowerActionType = z.infer<typeof ExtPowerActionTypeSchema>;
+
 export const ModifierKeySchema = z.enum(['LS', 'LC', 'LA', 'LG', 'RS', 'RC', 'RA', 'RG']);
 export type ModifierKey = z.infer<typeof ModifierKeySchema>;
 
@@ -153,7 +172,7 @@ export type CustomStickyLayer = z.infer<typeof CustomStickyLayerSchema>;
 
 export const MouseButtonSchema = z.object({
   behavior: z.literal('mouseButton'),
-  button: z.enum(['MB1', 'MB2', 'MB3', 'MB4', 'MB5']),
+  button: MouseButtonTypeSchema,
 });
 export type MouseButton = z.infer<typeof MouseButtonSchema>;
 
@@ -188,20 +207,20 @@ export type Bootloader = z.infer<typeof BootloaderSchema>;
 
 export const BluetoothActionSchema = z.object({
   behavior: z.literal('bluetooth'),
-  action: z.enum(['BT_SEL', 'BT_CLR', 'BT_NXT', 'BT_PRV', 'BT_DISC', 'BT_CLR_ALL']),
+  action: BluetoothActionTypeSchema,
   profile: z.number().optional(),
 });
 export type BluetoothAction = z.infer<typeof BluetoothActionSchema>;
 
 export const OutputSelectionSchema = z.object({
   behavior: z.literal('output'),
-  target: z.enum(['OUT_USB', 'OUT_BLE', 'OUT_TOG']),
+  target: OutputTargetTypeSchema,
 });
 export type OutputSelection = z.infer<typeof OutputSelectionSchema>;
 
 export const RgbUnderglowSchema = z.object({
   behavior: z.literal('rgbUnderglow'),
-  action: z.enum(['RGB_ON', 'RGB_OFF', 'RGB_TOG', 'RGB_HUI', 'RGB_HUD', 'RGB_SAI', 'RGB_SAD', 'RGB_BRI', 'RGB_BRD', 'RGB_SPI', 'RGB_SPD', 'RGB_EFF', 'RGB_EFR', 'RGB_COLOR_HSB', 'RGB_STATUS']),
+  action: RgbActionTypeSchema,
   hue: z.number().optional(),
   saturation: z.number().optional(),
   brightness: z.number().optional(),
@@ -210,14 +229,14 @@ export type RgbUnderglow = z.infer<typeof RgbUnderglowSchema>;
 
 export const BacklightSchema = z.object({
   behavior: z.literal('backlight'),
-  action: z.enum(['BL_ON', 'BL_OFF', 'BL_TOG', 'BL_INC', 'BL_DEC', 'BL_CYCLE', 'BL_SET']),
+  action: BacklightActionTypeSchema,
   brightness: z.number().optional(),
 });
 export type Backlight = z.infer<typeof BacklightSchema>;
 
 export const ExtPowerSchema = z.object({
   behavior: z.literal('extPower'),
-  action: z.enum(['EP_ON', 'EP_OFF', 'EP_TOG']),
+  action: ExtPowerActionTypeSchema,
 });
 export type ExtPower = z.infer<typeof ExtPowerSchema>;
 

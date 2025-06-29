@@ -1,4 +1,19 @@
-import type { Binding, ModifierKey, HoldTapDefinition, TapDanceDefinition, MacroDefinition, StickyKeyDefinition, StickyLayerDefinition, ModMorphDefinition } from './schemas';
+import type { 
+  Binding, 
+  ModifierKey, 
+  HoldTapDefinition, 
+  TapDanceDefinition, 
+  MacroDefinition, 
+  StickyKeyDefinition, 
+  StickyLayerDefinition, 
+  ModMorphDefinition,
+  MouseButtonType,
+  BluetoothActionType,
+  OutputTargetType,
+  RgbActionType,
+  BacklightActionType,
+  ExtPowerActionType
+} from './schemas';
 
 // Type alias for cleaner code
 export type Mod = ModifierKey;
@@ -98,20 +113,19 @@ export const macro = (name: string, bindings: MacroDefinition['bindings']): Bind
 });
 
 // System behaviors
-export const bt = (action: 'BT_CLR' | 'BT_SEL' | 'BT_NXT' | 'BT_PRV' | 'BT_DISC' | 'BT_CLR_ALL', profile?: number): Binding => ({
+export const bt = (action: BluetoothActionType, profile?: number): Binding => ({
   behavior: 'bluetooth',
   action,
   ...(profile !== undefined && { profile })
 });
 
-export const out = (target: 'OUT_BLE' | 'OUT_USB' | 'OUT_TOG'): Binding => ({
+export const out = (target: OutputTargetType): Binding => ({
   behavior: 'output',
   target
 });
 
 export const rgb_ug = (
-  action: 'RGB_BRD' | 'RGB_BRI' | 'RGB_COLOR_HSB' | 'RGB_EFF' | 'RGB_EFR' | 'RGB_HUD' | 'RGB_HUI' | 
-          'RGB_OFF' | 'RGB_ON' | 'RGB_SAD' | 'RGB_SAI' | 'RGB_SPD' | 'RGB_SPI' | 'RGB_TOG' | 'RGB_STATUS',
+  action: RgbActionType,
   hue?: number,
   saturation?: number,
   brightness?: number
@@ -124,7 +138,7 @@ export const rgb_ug = (
 });
 
 export const bl = (
-  action: 'BL_ON' | 'BL_OFF' | 'BL_TOG' | 'BL_INC' | 'BL_DEC' | 'BL_CYCLE' | 'BL_SET',
+  action: BacklightActionType,
   brightness?: number
 ): Binding => ({
   behavior: 'backlight',
@@ -132,13 +146,13 @@ export const bl = (
   ...(brightness !== undefined && { brightness })
 });
 
-export const ext_power = (action: 'EP_ON' | 'EP_OFF' | 'EP_TOG'): Binding => ({
+export const ext_power = (action: ExtPowerActionType): Binding => ({
   behavior: 'extPower',
   action
 });
 
 // Mouse behaviors
-export const mkp = (button: 'MB1' | 'MB2' | 'MB3' | 'MB4' | 'MB5'): Binding => ({
+export const mkp = (button: MouseButtonType): Binding => ({
   behavior: 'mouseButton',
   button
 });
