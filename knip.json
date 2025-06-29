@@ -11,7 +11,7 @@
     "**/*.test.ts",
     "**/*.spec.ts"
   ],
-  "ignoreDependencies": [],
+  "ignoreDependencies": ["@commitlint/cli"],
   "ignoreExportsUsedInFile": true,
   "eslint": {
     "config": ["eslint.config.js"]
@@ -20,3 +20,4 @@
     "config": ["tsconfig.json"]
   }
 }
+
