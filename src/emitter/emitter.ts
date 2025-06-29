@@ -156,7 +156,6 @@ function emitBehaviorReference(binding: CheckedBinding): string {
 function emitLayer(layer: CheckedLayer, indent: string = '    '): string {
   const lines: string[] = [];
   lines.push(`${indent}${layer.name}_layer {`);
-  lines.push(`${indent}    label = "${layer.name}";`);
   lines.push(`${indent}    bindings = <`);
   
   // Emit bindings in rows of 10 (typical for split keyboards)

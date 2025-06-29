@@ -31,7 +31,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &kp A
         >;
@@ -65,7 +64,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &kp A &kp LC(LS(B)) &trans &mo nav
         >;
@@ -125,7 +123,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &test_macro
         >;
@@ -172,7 +169,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &__synthetic_bluetooth_0
         >;
@@ -227,7 +223,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &hm LSHFT A
         >;
@@ -282,7 +277,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &td_q_esc Q ESC
         >;
@@ -333,7 +327,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
         >;
     };
@@ -375,7 +368,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
         >;
     };
@@ -406,7 +398,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &kp LA(LC(LS(A)))
         >;
@@ -448,7 +439,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &kp A &kp A &kp A &kp A &kp A &kp A &kp A &kp A &kp A &kp A
             &kp A &kp A &kp A &kp A &kp A &kp A &kp A &kp A &kp A &kp A
@@ -456,7 +446,6 @@ describe('emitter', () => {
     };
 
     nav_layer {
-        label = "nav";
         bindings = <
             &kp UP &kp DOWN
         >;
@@ -561,7 +550,6 @@ describe('emitter', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &kt CAPS &sk LSHFT &mt LCTRL ESC &lt nav SPC &to gaming &tog fn &sl sym &none &caps_word &key_repeat
             &mkp MB1 &mmv MOVE_X(10) MOVE_Y(-5) &msc SCRL_X(0) SCRL_Y(1) &sys_reset &bootloader &bt BT_CLR &out OUT_TOG &rgb_ug RGB_COLOR_HSB 128 100 50 &bl BL_SET 75 &ext_power EP_TOG

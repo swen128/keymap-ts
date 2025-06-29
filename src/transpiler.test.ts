@@ -21,7 +21,6 @@ describe('transpiler', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &kp A &kp LC(B) &trans &mo nav
         >;
@@ -173,14 +172,12 @@ describe('transpiler', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &kp A &test_macro
         >;
     };
 
     nav_layer {
-        label = "nav";
         bindings = <
             &kp UP
         >;
@@ -241,7 +238,6 @@ describe('transpiler', () => {
     compatible = "zmk,keymap";
 
     default_layer {
-        label = "default";
         bindings = <
             &hm __synthetic_bluetooth_0 A
         >;
