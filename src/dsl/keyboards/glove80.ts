@@ -56,6 +56,7 @@ export function glove80Keymap(config: {
   layers: ReadonlyArray<{ name: string; layout: Glove80Layout }>;
   combos?: Keymap['combos'];
   conditionalLayers?: Keymap['conditionalLayers'];
+  includes?: Keymap['includes'];
 }): Keymap {
   return {
     layers: config.layers.map(({name, layout}) => ({
@@ -63,6 +64,7 @@ export function glove80Keymap(config: {
       bindings: glove80Layout(layout)
     })),
     combos: config.combos,
-    conditionalLayers: config.conditionalLayers
+    conditionalLayers: config.conditionalLayers,
+    includes: config.includes
   };
 }
