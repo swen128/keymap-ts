@@ -22,45 +22,45 @@ function formatKeyWithModifiers(code: KeyWithModifiers): string {
   return sortedModifiers.reduceRight((acc, mod) => `${mod}(${acc})`, code.key);
 }
 
-function emitBehaviorReference(binding: CheckedBinding): string {
-  switch (binding.behavior) {
+function emitBehaviorReference(behaviorBinding: CheckedBinding): string {
+  switch (behaviorBinding.behavior) {
     case 'keyPress':
-      return `&kp ${formatKeyWithModifiers(binding.code)}`;
+      return `&kp ${formatKeyWithModifiers(behaviorBinding.code)}`;
     
     case 'keyToggle':
-      return `&kt ${formatKeyWithModifiers(binding.code)}`;
+      return `&kt ${formatKeyWithModifiers(behaviorBinding.code)}`;
     
     case 'stickyKey':
-      return `&sk ${formatKeyWithModifiers(binding.code)}`;
+      return `&sk ${formatKeyWithModifiers(behaviorBinding.code)}`;
     
     case 'customStickyKey':
-      return `&${binding.name} ${formatKeyWithModifiers(binding.code)}`;
+      return `&${behaviorBinding.name} ${formatKeyWithModifiers(behaviorBinding.code)}`;
     
     case 'modTap': {
-      const mod = formatKeyWithModifiers(binding.mod);
-      const tap = formatKeyWithModifiers(binding.tap);
+      const mod = formatKeyWithModifiers(behaviorBinding.mod);
+      const tap = formatKeyWithModifiers(behaviorBinding.tap);
       return `&mt ${mod} ${tap}`;
     }
     
     case 'layerTap': {
-      const tap = formatKeyWithModifiers(binding.tap);
-      return `&lt ${binding.layer} ${tap}`;
+      const tap = formatKeyWithModifiers(behaviorBinding.tap);
+      return `&lt ${behaviorBinding.layer} ${tap}`;
     }
     
     case 'toLayer':
-      return `&to ${binding.layer}`;
+      return `&to ${behaviorBinding.layer}`;
     
     case 'momentaryLayer':
-      return `&mo ${binding.layer}`;
+      return `&mo ${behaviorBinding.layer}`;
     
     case 'toggleLayer':
-      return `&tog ${binding.layer}`;
+      return `&tog ${behaviorBinding.layer}`;
     
     case 'stickyLayer':
-      return `&sl ${binding.layer}`;
+      return `&sl ${behaviorBinding.layer}`;
     
     case 'customStickyLayer':
-      return `&${binding.name} ${binding.layer}`;
+      return `&${behaviorBinding.name} ${behaviorBinding.layer}`;
     
     case 'transparent':
       return '&trans';
@@ -75,20 +75,21 @@ function emitBehaviorReference(binding: CheckedBinding): string {
       return '&key_repeat';
     
     case 'macro':
-      return `&${binding.macroName}`;
+      return `&${behaviorBinding.macroName}`;
     
     case 'holdTap': {
-      const hold = emitBehaviorReference(binding.holdBinding);
-      const tap = emitBehaviorReference(binding.tapBinding);
+      const hold = emitBehaviorReference(behaviorBinding.holdBinding);
+      const tap = emitBehaviorReference(behaviorBinding.tapBinding);
       // Extract parameters from the behavior references
       // For behaviors like &kp A, we want just "A"
-      // For macros like &__synthetic_bluetooth_0, we want "__synthetic_bluetooth_0"
+      // For behaviors that don't take params (like macros, caps_word), we want "0"
       const extractParam = (ref: string): string => {
         if (ref.startsWith('&')) {
           const parts = ref.split(' ');
           if (parts.length === 1) {
-            // It's a macro reference like &__synthetic_bluetooth_0
-            return ref.substring(1);
+            // It's a behavior without params (like macro, caps_word, etc)
+            // These should be represented as 0 in hold-tap parameters
+            return '0';
           } else {
             // It's a behavior with params like &kp A or &mo 1
             return parts.slice(1).join(' ');
@@ -99,35 +100,49 @@ function emitBehaviorReference(binding: CheckedBinding): string {
       
       const holdParam = extractParam(hold);
       const tapParam = extractParam(tap);
-      return `&${binding.name} ${holdParam} ${tapParam}`;
+      return `&${behaviorBinding.name} ${holdParam} ${tapParam}`;
     }
     
     case 'tapDance': {
-      const params = binding.bindings.map(b => {
+      const params = behaviorBinding.bindings.map(b => {
         const ref = emitBehaviorReference(b);
         // For keyPress behaviors, we need just the key code without &kp
         return ref.startsWith('&kp ') ? ref.slice(4) : ref.slice(1);
       }).join(' ');
-      return `&${binding.name} ${params}`;
+      return `&${behaviorBinding.name} ${params}`;
     }
     
     case 'modMorph': {
-      const defaultRef = emitBehaviorReference(binding.defaultBinding);
-      const morphedRef = emitBehaviorReference(binding.morphedBinding);
-      // For keyPress behaviors, we need just the key code without &kp
-      const defaultParam = defaultRef.startsWith('&kp ') ? defaultRef.slice(4) : defaultRef.slice(1);
-      const morphedParam = morphedRef.startsWith('&kp ') ? morphedRef.slice(4) : morphedRef.slice(1);
-      return `&${binding.name} ${defaultParam} ${morphedParam}`;
+      const defaultRef = emitBehaviorReference(behaviorBinding.defaultBinding);
+      const morphedRef = emitBehaviorReference(behaviorBinding.morphedBinding);
+      
+      // Extract parameters from behavior references
+      const extractParam = (ref: string): string => {
+        if (ref.startsWith('&kp ')) {
+          // For keyPress behaviors, we need just the key code without &kp
+          return ref.slice(4);
+        } else if (ref.includes(' ')) {
+          // For behaviors with params, extract everything after the behavior name
+          return ref.slice(ref.indexOf(' ') + 1);
+        } else {
+          // For behaviors without params (like &caps_word), use 0
+          return '0';
+        }
+      };
+      
+      const defaultParam = extractParam(defaultRef);
+      const morphedParam = extractParam(morphedRef);
+      return `&${behaviorBinding.name} ${defaultParam} ${morphedParam}`;
     }
     
     case 'mouseButton':
-      return `&mkp ${binding.button}`;
+      return `&mkp ${behaviorBinding.button}`;
     
     case 'mouseMove':
-      return `&mmv MOVE_X(${binding.x ?? 0}) MOVE_Y(${binding.y ?? 0})`;
+      return `&mmv MOVE_X(${behaviorBinding.x ?? 0}) MOVE_Y(${behaviorBinding.y ?? 0})`;
     
     case 'mouseScroll':
-      return `&msc SCRL_X(${binding.x ?? 0}) SCRL_Y(${binding.y ?? 0})`;
+      return `&msc SCRL_X(${behaviorBinding.x ?? 0}) SCRL_Y(${behaviorBinding.y ?? 0})`;
     
     case 'systemReset':
       return '&sys_reset';
@@ -136,34 +151,34 @@ function emitBehaviorReference(binding: CheckedBinding): string {
       return '&bootloader';
     
     case 'bluetooth': {
-      if (binding.action === 'BT_SEL' && binding.profile !== undefined) {
-        return `&bt BT_SEL ${binding.profile}`;
+      if (behaviorBinding.action === 'BT_SEL' && behaviorBinding.profile !== undefined) {
+        return `&bt BT_SEL ${behaviorBinding.profile}`;
       }
-      return `&bt ${binding.action}`;
+      return `&bt ${behaviorBinding.action}`;
     }
     
     case 'output':
-      return `&out ${binding.target}`;
+      return `&out ${behaviorBinding.target}`;
     
     case 'rgbUnderglow': {
-      const params = binding.action === 'RGB_COLOR_HSB' && binding.hue !== undefined
-        ? `${binding.action} ${binding.hue} ${binding.saturation ?? 100} ${binding.brightness ?? 100}`
-        : binding.action;
+      const params = behaviorBinding.action === 'RGB_COLOR_HSB' && behaviorBinding.hue !== undefined
+        ? `${behaviorBinding.action} ${behaviorBinding.hue} ${behaviorBinding.saturation ?? 100} ${behaviorBinding.brightness ?? 100}`
+        : behaviorBinding.action;
       return `&rgb_ug ${params}`;
     }
     
     case 'backlight': {
-      const params = binding.action === 'BL_SET' && binding.brightness !== undefined
-        ? `${binding.action} ${binding.brightness}`
-        : binding.action;
+      const params = behaviorBinding.action === 'BL_SET' && behaviorBinding.brightness !== undefined
+        ? `${behaviorBinding.action} ${behaviorBinding.brightness}`
+        : behaviorBinding.action;
       return `&bl ${params}`;
     }
     
     case 'extPower':
-      return `&ext_power ${binding.action}`;
+      return `&ext_power ${behaviorBinding.action}`;
     
     case 'softOff':
-      return binding.holdTimeMs !== undefined ? `&soft_off ${binding.holdTimeMs}` : '&soft_off';
+      return behaviorBinding.holdTimeMs !== undefined ? `&soft_off ${behaviorBinding.holdTimeMs}` : '&soft_off';
     
     case 'studioUnlock':
       return '&studio_unlock';
@@ -194,36 +209,36 @@ function emitLayer(layer: CheckedLayer, indent: string = '    '): string {
 }
 
 // Helper to convert a Binding to the format expected by emitBehaviorReference
-function emitBindingReference(binding: Binding): string {
+function emitBindingReference(behaviorBinding: Binding): string {
   // For macro actions, we need to handle the original binding format
   // The checker has already validated these, so we can safely emit them
-  switch (binding.behavior) {
+  switch (behaviorBinding.behavior) {
     case 'bluetooth':
-      return `&bt ${binding.action}${binding.action === 'BT_SEL' && binding.profile !== undefined ? ` ${binding.profile}` : ''}`;
+      return `&bt ${behaviorBinding.action}${behaviorBinding.action === 'BT_SEL' && behaviorBinding.profile !== undefined ? ` ${behaviorBinding.profile}` : ''}`;
     case 'output':
-      return `&out ${binding.target}`;
+      return `&out ${behaviorBinding.target}`;
     case 'rgbUnderglow': {
-      const params = binding.action === 'RGB_COLOR_HSB' && binding.hue !== undefined
-        ? `${binding.action} ${binding.hue} ${binding.saturation ?? 100} ${binding.brightness ?? 100}`
-        : binding.action;
+      const params = behaviorBinding.action === 'RGB_COLOR_HSB' && behaviorBinding.hue !== undefined
+        ? `${behaviorBinding.action} ${behaviorBinding.hue} ${behaviorBinding.saturation ?? 100} ${behaviorBinding.brightness ?? 100}`
+        : behaviorBinding.action;
       return `&rgb_ug ${params}`;
     }
     case 'backlight': {
-      const params = binding.action === 'BL_SET' && binding.brightness !== undefined
-        ? `${binding.action} ${binding.brightness}`
-        : binding.action;
+      const params = behaviorBinding.action === 'BL_SET' && behaviorBinding.brightness !== undefined
+        ? `${behaviorBinding.action} ${behaviorBinding.brightness}`
+        : behaviorBinding.action;
       return `&bl ${params}`;
     }
     case 'extPower':
-      return `&ext_power ${binding.action}`;
+      return `&ext_power ${behaviorBinding.action}`;
     case 'softOff':
-      return binding.holdTimeMs !== undefined ? `&soft_off ${binding.holdTimeMs}` : '&soft_off';
+      return behaviorBinding.holdTimeMs !== undefined ? `&soft_off ${behaviorBinding.holdTimeMs}` : '&soft_off';
     case 'mouseMove':
-      return `&mmv MOVE_X(${binding.x ?? 0}) MOVE_Y(${binding.y ?? 0})`;
+      return `&mmv MOVE_X(${behaviorBinding.x ?? 0}) MOVE_Y(${behaviorBinding.y ?? 0})`;
     case 'mouseScroll':
-      return `&msc SCRL_X(${binding.x ?? 0}) SCRL_Y(${binding.y ?? 0})`;
+      return `&msc SCRL_X(${behaviorBinding.x ?? 0}) SCRL_Y(${behaviorBinding.y ?? 0})`;
     case 'keyPress':
-      return `&kp ${formatKeyWithModifiers(binding.code)}`;
+      return `&kp ${formatKeyWithModifiers(behaviorBinding.code)}`;
     case 'transparent':
       return '&trans';
     case 'none':
@@ -233,45 +248,45 @@ function emitBindingReference(binding: Binding): string {
     case 'bootloader':
       return '&bootloader';
     case 'mouseButton':
-      return `&mkp ${binding.button}`;
+      return `&mkp ${behaviorBinding.button}`;
     case 'studioUnlock':
       return '&studio_unlock';
     case 'keyToggle':
-      return `&kt ${formatKeyWithModifiers(binding.code)}`;
+      return `&kt ${formatKeyWithModifiers(behaviorBinding.code)}`;
     case 'stickyKey':
-      return `&sk ${formatKeyWithModifiers(binding.code)}`;
+      return `&sk ${formatKeyWithModifiers(behaviorBinding.code)}`;
     case 'customStickyKey':
-      return `&${binding.definition.name} ${formatKeyWithModifiers(binding.code)}`;
+      return `&${behaviorBinding.definition.name} ${formatKeyWithModifiers(behaviorBinding.code)}`;
     case 'modTap': {
-      const mod = formatKeyWithModifiers(binding.mod);
-      const tap = formatKeyWithModifiers(binding.tap);
+      const mod = formatKeyWithModifiers(behaviorBinding.mod);
+      const tap = formatKeyWithModifiers(behaviorBinding.tap);
       return `&mt ${mod} ${tap}`;
     }
     case 'layerTap': {
-      const tap = formatKeyWithModifiers(binding.tap);
-      return `&lt ${binding.layer} ${tap}`;
+      const tap = formatKeyWithModifiers(behaviorBinding.tap);
+      return `&lt ${behaviorBinding.layer} ${tap}`;
     }
     case 'toLayer':
-      return `&to ${binding.layer}`;
+      return `&to ${behaviorBinding.layer}`;
     case 'momentaryLayer':
-      return `&mo ${binding.layer}`;
+      return `&mo ${behaviorBinding.layer}`;
     case 'toggleLayer':
-      return `&tog ${binding.layer}`;
+      return `&tog ${behaviorBinding.layer}`;
     case 'stickyLayer':
-      return `&sl ${binding.layer}`;
+      return `&sl ${behaviorBinding.layer}`;
     case 'customStickyLayer':
-      return `&${binding.definition.name} ${binding.layer}`;
+      return `&${behaviorBinding.definition.name} ${behaviorBinding.layer}`;
     case 'capsWord':
       return '&caps_word';
     case 'keyRepeat':
       return '&key_repeat';
     case 'macro':
       // Should not appear here, but handle it
-      return `&${binding.macro.name}`;
+      return `&${behaviorBinding.macro.name}`;
     case 'holdTap': {
       // Extract parameters for the hold-tap behavior
-      const holdRef = emitBindingReference(binding.holdBinding);
-      const tapRef = emitBindingReference(binding.tapBinding);
+      const holdRef = emitBindingReference(behaviorBinding.holdBinding);
+      const tapRef = emitBindingReference(behaviorBinding.tapBinding);
       
       // Extract just the parameter part (after the behavior name)
       const extractParam = (ref: string): string => {
@@ -282,7 +297,7 @@ function emitBindingReference(binding: Binding): string {
       const holdParam = extractParam(holdRef);
       const tapParam = extractParam(tapRef);
       
-      return `&${binding.definition.name} ${holdParam} ${tapParam}`;
+      return `&${behaviorBinding.definition.name} ${holdParam} ${tapParam}`;
     }
     case 'tapDance':
     case 'modMorph':
@@ -402,6 +417,10 @@ function emitBehaviorDefinition(def: BehaviorDefinition, indent: string = '    '
       if (def.bindings.length > 0) {
         const bindingRefs = def.bindings.map(b => `<&${b}>`).join(', ');
         lines.push(`${indent}    bindings = ${bindingRefs};`);
+      }
+      if (def.mods !== undefined && def.mods.length > 0) {
+        const modStr = def.mods.join('|');
+        lines.push(`${indent}    mods = <(${modStr})>;`);
       }
       if (def.keepMods !== undefined && def.keepMods) {
         lines.push(`${indent}    keep-mods = <(MOD_LSFT|MOD_RSFT)>;`);

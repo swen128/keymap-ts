@@ -100,6 +100,7 @@ export interface CheckedTapDanceDefinition extends BaseTapDanceDefinition {
 
 export interface CheckedModMorphDefinition extends BaseModMorphDefinition {
   bindings: string[];
+  mods?: string[];
 }
 
 /**

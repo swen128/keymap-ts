@@ -848,4 +848,133 @@ describe('emitter', () => {
     const output = emit(keymap);
     expect(output).toBe(expected);
   });
+
+  it('should emit mod-morph behavior with behavior parameters as 0', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          {
+            behavior: 'modMorph',
+            name: 'mod_caps_word',
+            mods: ['MOD_LALT'],
+            defaultBinding: { behavior: 'capsWord' },
+            morphedBinding: { behavior: 'capsWord' }
+          }
+        ]
+      }],
+      macros: [],
+      behaviors: [{
+        compatible: 'zmk,behavior-mod-morph',
+        name: 'mod_caps_word',
+        mods: ['MOD_LALT'],
+        bindings: ['caps_word', 'caps_word']
+      }],
+      combos: [],
+      conditionalLayers: []
+    };
+    
+    const expected = `/ {
+  behaviors {
+    mod_caps_word: mod_caps_word {
+        compatible = "zmk,behavior-mod-morph";
+        label = "MOD_CAPS_WORD";
+        #binding-cells = <2>;
+        bindings = <&caps_word>, <&caps_word>;
+        mods = <(MOD_LALT)>;
+    };
+
+  };
+
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+            &mod_caps_word 0 0
+        >;
+    };
+
+  };
+};`;
+    
+    const output = emit(keymap);
+    expect(output).toBe(expected);
+  });
+
+  it('should emit hold-tap behavior with macro parameters as 0', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          {
+            behavior: 'holdTap',
+            name: 'smart_select',
+            holdBinding: { behavior: 'macro', macroName: 'select_line' },
+            tapBinding: { behavior: 'macro', macroName: 'select_word' }
+          }
+        ]
+      }],
+      macros: [
+        {
+          name: 'select_line',
+          bindings: [{ type: 'tap', code: { key: 'HOME', modifiers: [] } }]
+        },
+        {
+          name: 'select_word',
+          bindings: [{ type: 'tap', code: { key: 'W', modifiers: ['LC'] } }]
+        }
+      ],
+      behaviors: [{
+        compatible: 'zmk,behavior-hold-tap',
+        name: 'smart_select',
+        tappingTermMs: 200,
+        bindings: ['macro', 'macro']
+      }],
+      combos: [],
+      conditionalLayers: []
+    };
+    
+    const expected = `/ {
+  behaviors {
+    smart_select: smart_select {
+        compatible = "zmk,behavior-hold-tap";
+        label = "SMART_SELECT";
+        #binding-cells = <2>;
+        bindings = <&macro>, <&macro>;
+        tapping-term-ms = <200>;
+    };
+
+  };
+
+  macros {
+    select_line: select_line {
+        compatible = "zmk,behavior-macro";
+        #binding-cells = <0>;
+        bindings = <&kp HOME>;
+    };
+
+    select_word: select_word {
+        compatible = "zmk,behavior-macro";
+        #binding-cells = <0>;
+        bindings = <&kp LC(W)>;
+    };
+
+  };
+
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+            &smart_select 0 0
+        >;
+    };
+
+  };
+};`;
+    
+    const output = emit(keymap);
+    expect(output).toBe(expected);
+  });
 });

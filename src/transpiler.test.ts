@@ -250,7 +250,7 @@ describe('transpiler', () => {
 
     default_layer {
         bindings = <
-            &hm __synthetic_bluetooth_0 A
+            &hm 0 A
         >;
     };
 
