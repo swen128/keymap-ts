@@ -1,3 +1,4 @@
+import { Result, ok, err } from 'neverthrow';
 import type {
   Keymap,
   Binding,
@@ -18,11 +19,11 @@ import type {
   ExtendedMacroAction,
   BehaviorMacroAction,
   ValidationError,
-  CheckResult,
   BehaviorDefinition,
   CheckedHoldTapDefinition,
   CheckedTapDanceDefinition,
-  CheckedModMorphDefinition
+  CheckedModMorphDefinition,
+  CheckedKeymap
 } from './types.js';
 import {syntheticMacroCounter} from "./syntheticMacroCounter.js";
 
@@ -39,7 +40,7 @@ type BaseBehaviorDef =
   | TapDanceDefinition
   | ModMorphDefinition;
 
-export function check(keymap: Keymap): CheckResult {
+export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> {
   syntheticMacroCounter.reset();
 
   const errors: ValidationError[] = [];
@@ -244,7 +245,7 @@ export function check(keymap: Keymap): CheckResult {
   });
 
   if (errors.length > 0) {
-    return {success: false, errors};
+    return err(errors);
   }
   // Extract user-defined macros from macro bindings
   const extractedMacros: MacroDefinition[] = [];
@@ -419,20 +420,17 @@ export function check(keymap: Keymap): CheckResult {
   });
 
   if (errors.length > 0) {
-    return {success: false, errors};
+    return err(errors);
   }
 
-  return {
-    success: true,
-    keymap: {
-      layers: checkedLayers,
-      macros: allMacros,
-      behaviors: behaviorDefinitions,
-      combos: keymap.combos ?? [],
-      conditionalLayers: keymap.conditionalLayers ?? [],
-      includes: keymap.includes
-    }
-  };
+  return ok({
+    layers: checkedLayers,
+    macros: allMacros,
+    behaviors: behaviorDefinitions,
+    combos: keymap.combos ?? [],
+    conditionalLayers: keymap.conditionalLayers ?? [],
+    includes: keymap.includes
+  });
 }
 
 // Get the ZMK behavior name for a checked simple binding

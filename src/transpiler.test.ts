@@ -42,20 +42,20 @@ describe('transpiler', () => {
     
     const result = transpile(keymap);
     
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.output).toBe(expected);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(expected);
     }
   });
 
   it('should return validation errors for invalid input', () => {
     const result = transpile({ invalid: 'data' });
     
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.length).toBeGreaterThan(0);
       // The exact error message depends on Zod's validation
-      expect(result.errors[0]?.message).toBeTruthy();
+      expect(result.error[0]?.message).toBeTruthy();
     }
   });
 
@@ -71,7 +71,7 @@ describe('transpiler', () => {
     
     const result = transpile(keymap);
     
-    expect(result.success).toBe(false);
+    expect(result.isErr()).toBe(true);
   });
 
   it('should handle checker errors', () => {
@@ -107,10 +107,10 @@ describe('transpiler', () => {
     
     const result = transpile(keymap);
     
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]?.message).toContain('conflicting definitions');
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.length).toBeGreaterThan(0);
+      expect(result.error[0]?.message).toContain('conflicting definitions');
     }
   });
 
@@ -199,9 +199,9 @@ describe('transpiler', () => {
     
     const result = transpile(keymap);
     
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.output).toBe(expected);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(expected);
     }
   });
 
@@ -259,9 +259,9 @@ describe('transpiler', () => {
     
     const result = transpile(keymap);
     
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.output).toBe(expected);
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toBe(expected);
     }
   });
 
@@ -281,9 +281,9 @@ describe('transpiler', () => {
     };
     
     const result = transpile(keymap);
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      const errorMessages = result.errors.map(e => e.message);
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      const errorMessages = result.error.map(e => e.message);
       expect(errorMessages).toContain('Include path must not contain line breaks');
       expect(errorMessages).toContain('Include path must not have leading or trailing whitespace');
       expect(errorMessages).toContain('Include path must not contain quotes');
@@ -306,13 +306,13 @@ describe('transpiler', () => {
     };
     
     const result = transpile(keymap);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.output).toContain('#include <behaviors.dtsi>');
-      expect(result.output).toContain('#include <dt-bindings/zmk/keys.h>');
-      expect(result.output).toContain('#include <dt-bindings/zmk/bt.h>');
-      expect(result.output).toContain('#include <custom/behaviors.dtsi>');
-      expect(result.output).toContain('#include <../shared/macros.dtsi>');
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value).toContain('#include <behaviors.dtsi>');
+      expect(result.value).toContain('#include <dt-bindings/zmk/keys.h>');
+      expect(result.value).toContain('#include <dt-bindings/zmk/bt.h>');
+      expect(result.value).toContain('#include <custom/behaviors.dtsi>');
+      expect(result.value).toContain('#include <../shared/macros.dtsi>');
     }
   });
 });

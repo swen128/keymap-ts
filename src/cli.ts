@@ -113,19 +113,19 @@ async function main(): Promise<void> {
         const keymap = await loadDefaultExport(options.inputFile);
         const result = transpile(keymap);
 
-        if (!result.success) {
+        if (result.isErr()) {
           console.error('Transpilation failed:');
-          result.errors.forEach(error => {
+          result.error.forEach(error => {
             console.error(formatError(error));
           });
           throw new Error('Transpilation failed');
         }
 
         if (options.outputFile !== undefined) {
-          writeFileSync(options.outputFile, result.output, 'utf-8');
+          writeFileSync(options.outputFile, result.value, 'utf-8');
           console.log(`Successfully wrote output to ${options.outputFile}`);
         } else {
-          console.log(result.output);
+          console.log(result.value);
         }
       } catch (error) {
         if (error instanceof Error && error.message === 'Transpilation failed') {

@@ -222,9 +222,3 @@ export interface ValidationError {
   message: string;
 }
 
-/**
- * Result of the checking phase
- */
-export type CheckResult = 
-  | { success: true; keymap: CheckedKeymap }
-  | { success: false; errors: ValidationError[] };

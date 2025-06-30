@@ -25,18 +25,18 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
-    expect(result.keymap.layers[0]?.bindings).toEqual([
+    expect(result.value.layers[0]?.bindings).toEqual([
       { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
       { behavior: 'keyPress', code: { key: 'B', modifiers: ['LC', 'LS'] } },
       { behavior: 'transparent' },
       { behavior: 'momentaryLayer', layer: 1 }  // nav is at index 1
     ]);
     
-    expect(result.keymap.macros).toHaveLength(0);
+    expect(result.value.macros).toHaveLength(0);
   });
 
   it('should synthesize macros for complex bindings inside hold-tap and collect behavior definitions', () => {
@@ -56,12 +56,12 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
     // Check that the hold-tap was converted correctly
-    const binding = result.keymap.layers[0]?.bindings[0];
+    const binding = result.value.layers[0]?.bindings[0];
     expect(binding).toEqual({
       behavior: 'holdTap',
       name: 'my_ht',
@@ -70,8 +70,8 @@ describe('checker', () => {
     });
     
     // Check that a synthetic macro was created
-    expect(result.keymap.macros).toHaveLength(1);
-    expect(result.keymap.macros[0]).toEqual({
+    expect(result.value.macros).toHaveLength(1);
+    expect(result.value.macros[0]).toEqual({
       name: '__synthetic_bluetooth_0',
       bindings: [{
         type: 'behavior',
@@ -80,8 +80,8 @@ describe('checker', () => {
     });
     
     // Check that the hold-tap behavior definition was collected with bindings
-    expect(result.keymap.behaviors).toHaveLength(1);
-    expect(result.keymap.behaviors[0]).toEqual({
+    expect(result.value.behaviors).toHaveLength(1);
+    expect(result.value.behaviors[0]).toEqual({
       compatible: 'zmk,behavior-hold-tap',
       name: 'my_ht',
       bindings: ['__synthetic_bluetooth_1', 'kp']  // bluetooth wrapped in macro, kp for keyPress
@@ -108,12 +108,12 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
     // Check that the tap-dance was converted correctly
-    const binding = result.keymap.layers[0]?.bindings[0];
+    const binding = result.value.layers[0]?.bindings[0];
     expect(binding).toEqual({
       behavior: 'tapDance',
       name: 'my_td',
@@ -125,11 +125,11 @@ describe('checker', () => {
     });
     
     // Check that synthetic macros were created
-    expect(result.keymap.macros).toHaveLength(2);
+    expect(result.value.macros).toHaveLength(2);
     
     // Check that the tap-dance behavior definition was collected with bindings
-    expect(result.keymap.behaviors).toHaveLength(1);
-    expect(result.keymap.behaviors[0]).toEqual({
+    expect(result.value.behaviors).toHaveLength(1);
+    expect(result.value.behaviors[0]).toEqual({
       compatible: 'zmk,behavior-tap-dance',
       name: 'my_td',
       bindings: ['__synthetic_bluetooth_1', '__synthetic_output_0', 'kp']  // complex behaviors wrapped in macros
@@ -159,13 +159,13 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
     // Both hold-taps should reference the same synthetic macro
-    const binding1 = result.keymap.layers[0]?.bindings[0];
-    const binding2 = result.keymap.layers[0]?.bindings[1];
+    const binding1 = result.value.layers[0]?.bindings[0];
+    const binding2 = result.value.layers[0]?.bindings[1];
     
     if (binding1?.behavior !== 'holdTap' || binding2?.behavior !== 'holdTap') {
       throw new Error('Expected hold-tap bindings');
@@ -175,11 +175,11 @@ describe('checker', () => {
     expect(binding2.holdBinding).toEqual({ behavior: 'macro', macroName: '__synthetic_bluetooth_0' });
     
     // Only one synthetic macro should be created
-    expect(result.keymap.macros).toHaveLength(1);
+    expect(result.value.macros).toHaveLength(1);
     
     // Should have collected both hold-tap definitions (they have different names)
-    expect(result.keymap.behaviors).toHaveLength(2);
-    const behaviorNames = result.keymap.behaviors.map(b => b.name);
+    expect(result.value.behaviors).toHaveLength(2);
+    const behaviorNames = result.value.behaviors.map(b => b.name);
     expect(behaviorNames).toContain('ht1');
     expect(behaviorNames).toContain('ht2');
   });
@@ -212,12 +212,12 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
     // The inner hold-tap should be wrapped in a synthetic macro
-    const binding = result.keymap.layers[0]?.bindings[0];
+    const binding = result.value.layers[0]?.bindings[0];
     expect(binding).toEqual({
       behavior: 'holdTap',
       name: 'outer_ht',
@@ -226,12 +226,12 @@ describe('checker', () => {
     });
     
     // Check the synthetic macro contains the inner hold-tap
-    expect(result.keymap.macros).toHaveLength(1);
-    expect(result.keymap.macros[0]?.name).toBe('__synthetic_holdTap_0');
+    expect(result.value.macros).toHaveLength(1);
+    expect(result.value.macros[0]?.name).toBe('__synthetic_holdTap_0');
     
     // Should have collected both hold-tap definitions
-    expect(result.keymap.behaviors).toHaveLength(2);
-    const behaviorNames = result.keymap.behaviors.map(b => b.name);
+    expect(result.value.behaviors).toHaveLength(2);
+    const behaviorNames = result.value.behaviors.map(b => b.name);
     expect(behaviorNames).toContain('outer_ht');
     expect(behaviorNames).toContain('inner_ht');
   });
@@ -250,19 +250,19 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
     // Complex behaviors should remain as-is at the top level
-    expect(result.keymap.layers[0]?.bindings).toEqual([
+    expect(result.value.layers[0]?.bindings).toEqual([
       { behavior: 'bluetooth', action: 'BT_SEL', profile: 0 },
       { behavior: 'output', target: 'OUT_USB' },
       { behavior: 'rgbUnderglow', action: 'RGB_TOG' }
     ]);
     
     // No synthetic macros should be created
-    expect(result.keymap.macros).toHaveLength(0);
+    expect(result.value.macros).toHaveLength(0);
   });
 
   it('should handle mod-morph with complex bindings and collect behavior definitions', () => {
@@ -283,12 +283,12 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
     // Check that the mod-morph was converted correctly
-    const binding = result.keymap.layers[0]?.bindings[0];
+    const binding = result.value.layers[0]?.bindings[0];
     expect(binding).toEqual({
       behavior: 'modMorph',
       name: 'my_mm',
@@ -298,11 +298,11 @@ describe('checker', () => {
     });
     
     // Check that a synthetic macro was created
-    expect(result.keymap.macros).toHaveLength(1);
+    expect(result.value.macros).toHaveLength(1);
     
     // Check that the mod-morph behavior definition was collected with bindings
-    expect(result.keymap.behaviors).toHaveLength(1);
-    expect(result.keymap.behaviors[0]).toEqual({
+    expect(result.value.behaviors).toHaveLength(1);
+    expect(result.value.behaviors[0]).toEqual({
       compatible: 'zmk,behavior-mod-morph',
       name: 'my_mm',
       bindings: ['__synthetic_bluetooth_0', 'kp']  // bluetooth wrapped in macro, kp for keyPress
@@ -361,8 +361,8 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
     // Should have collected 5 unique behavior definitions:
@@ -371,9 +371,9 @@ describe('checker', () => {
     // 3. td1 (tap-dance)
     // 4. my_sl (custom sticky layer nested in tap-dance)
     // 5. mm1 (mod-morph from combo)
-    expect(result.keymap.behaviors).toHaveLength(5);
+    expect(result.value.behaviors).toHaveLength(5);
     
-    const behaviorNames = result.keymap.behaviors.map(b => b.name);
+    const behaviorNames = result.value.behaviors.map(b => b.name);
     expect(behaviorNames).toContain('ht1');
     expect(behaviorNames).toContain('my_sk');
     expect(behaviorNames).toContain('td1');
@@ -412,13 +412,13 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
     // Should only have one ht1 definition after deduplication
-    expect(result.keymap.behaviors.filter(b => b.name === 'ht1')).toHaveLength(1);
-    expect(result.keymap.behaviors[0]).toEqual({
+    expect(result.value.behaviors.filter(b => b.name === 'ht1')).toHaveLength(1);
+    expect(result.value.behaviors[0]).toEqual({
       compatible: 'zmk,behavior-hold-tap',
       name: 'ht1',
       tappingTermMs: 200,
@@ -457,13 +457,13 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    expect(result.success).toBe(false);
-    if (result.success) {
+    expect(result.isErr()).toBe(true);
+    if (result.isOk()) {
       throw new Error('Expected check to fail');
     }
     
-    expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]?.message).toContain('Behavior "ht1" has conflicting definitions');
+    expect(result.error).toHaveLength(1);
+    expect(result.error[0]?.message).toContain('Behavior "ht1" has conflicting definitions');
   });
 
   it('should validate layer references exist', () => {
@@ -478,10 +478,10 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]?.message).toContain('Layer "NonExistent" does not exist');
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toHaveLength(1);
+      expect(result.error[0]?.message).toContain('Layer "NonExistent" does not exist');
     }
   });
 
@@ -512,10 +512,10 @@ describe('checker', () => {
     };
     
     const result = check(keymap);
-    expect(result.success).toBe(true);
-    if (result.success) {
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
       // Should only have one instance of test_macro
-      const testMacros = result.keymap.macros.filter(m => m.name === 'test_macro');
+      const testMacros = result.value.macros.filter(m => m.name === 'test_macro');
       expect(testMacros).toHaveLength(1);
     }
   });
@@ -549,10 +549,10 @@ describe('checker', () => {
     };
     
     const result = check(keymap);
-    expect(result.success).toBe(true);
-    if (result.success) {
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
       // Find the ht_in_macro behavior definition
-      const htBehavior = result.keymap.behaviors.find(b => b.name === 'ht_in_macro');
+      const htBehavior = result.value.behaviors.find(b => b.name === 'ht_in_macro');
       expect(htBehavior).toBeDefined();
       if (htBehavior && htBehavior.compatible === 'zmk,behavior-hold-tap') {
         // Should have bindings array with kp and mo
@@ -585,10 +585,10 @@ describe('checker', () => {
     };
     
     const result = check(keymap);
-    expect(result.success).toBe(true);
-    if (result.success) {
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
       // Find the copy_selection macro
-      const macro = result.keymap.macros.find(m => m.name === 'copy_selection');
+      const macro = result.value.macros.find(m => m.name === 'copy_selection');
       expect(macro).toBeDefined();
       if (macro) {
         // The behavior action should have the layer converted to index 0
@@ -654,14 +654,14 @@ describe('checker', () => {
     
     const result = check(keymap);
     
-    if (!result.success) {
-      throw new Error('Check failed: ' + JSON.stringify(result.errors));
+    if (result.isErr()) {
+      throw new Error('Check failed: ' + JSON.stringify(result.error));
     }
     
     // Find each behavior definition
-    const htMulti = result.keymap.behaviors.find(b => b.name === 'ht_multi');
-    const tdComplex = result.keymap.behaviors.find(b => b.name === 'td_complex');
-    const htNested = result.keymap.behaviors.find(b => b.name === 'ht_nested');
+    const htMulti = result.value.behaviors.find(b => b.name === 'ht_multi');
+    const tdComplex = result.value.behaviors.find(b => b.name === 'td_complex');
+    const htNested = result.value.behaviors.find(b => b.name === 'ht_nested');
     
     // ht_multi should have exactly 2 behaviors (hold-tap always has exactly 2)
     expect(htMulti).toBeDefined();
