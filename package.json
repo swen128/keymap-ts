@@ -1,5 +1,5 @@
 {
-  "name": "zmk-keymap-editor",
+  "name": "keymap-ts",
   "version": "0.1.0",
   "description": "TypeScript DSL for creating ZMK keyboard firmware keymaps",
   "main": "./dist/index.js",
@@ -7,7 +7,7 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "bin": {
-    "zmk-keymap-editor": "./dist/cli.js"
+    "kts": "./dist/cli.js"
   },
   "files": [
     "dist"

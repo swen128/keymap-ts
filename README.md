@@ -1,4 +1,4 @@
-# ZMK Keymap Editor
+# keymap-ts
 
 A TypeScript DSL for creating ZMK keyboard firmware keymaps with type safety and validation.
 
@@ -14,9 +14,9 @@ A TypeScript DSL for creating ZMK keyboard firmware keymaps with type safety and
 ## Installation
 
 ```bash
-npm install zmk-keymap-editor
+npm install keymap-ts
 # or
-bun add zmk-keymap-editor
+bun add keymap-ts
 ```
 
 ## Usage
@@ -25,13 +25,13 @@ bun add zmk-keymap-editor
 
 ```bash
 # Build a keymap file
-npx zmk-keymap-editor build keymap.ts
+npx kts build keymap.ts
 
 # Output to a specific file
-npx zmk-keymap-editor build keymap.ts output.keymap
+npx kts build keymap.ts output.keymap
 
 # Show help
-npx zmk-keymap-editor --help
+npx kts --help
 ```
 
 ### Library Usage
@@ -45,7 +45,7 @@ import {
   macro, ht, td, mm,
   bt, out, rgb_ug, 
   tap, press, release, wait, behavior 
-} from 'zmk-keymap-editor';
+} from 'keymap-ts';
 
 // Define custom behaviors
 const homeRowMods = {
