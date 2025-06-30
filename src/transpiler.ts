@@ -1,6 +1,6 @@
-import { KeymapSchema } from './dsl/schemas';
-import { check } from './checker/checker';
-import { emit } from './emitter/emitter';
+import { KeymapSchema } from './dsl/schemas.js';
+import { check } from './checker/checker.js';
+import { emit } from './emitter/emitter.js';
 
 export interface TranspileResult {
   success: true;

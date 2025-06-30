@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
-import { transpile } from './transpiler';
-import type { Keymap } from './dsl/schemas';
+import { transpile } from './transpiler.js';
+import type { Keymap } from './dsl/schemas.js';
 
 describe('transpiler', () => {
   it('should transpile a simple keymap successfully', () => {

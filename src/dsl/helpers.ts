@@ -13,7 +13,7 @@ import type {
   RgbActionType,
   BacklightActionType,
   ExtPowerActionType
-} from './schemas';
+} from './schemas.js';
 
 // Type alias for cleaner code
 export type Mod = ModifierKey;

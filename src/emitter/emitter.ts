@@ -5,8 +5,8 @@ import type {
   CheckedLayer,
   CheckedMacroDefinition,
   CheckedMacroAction
-} from '../checker/types';
-import type {Binding, Combo, ConditionalLayer, KeyWithModifiers} from '../dsl/schemas';
+} from '../checker/types.js';
+import type {Binding, Combo, ConditionalLayer, KeyWithModifiers} from '../dsl/schemas.js';
 
 /**
  * Emits ZMK devicetree format from a checked keymap

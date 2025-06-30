@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import {transpile} from './transpiler';
+import {transpile} from './transpiler.js';
 import {writeFileSync} from 'fs';
 import {resolve} from 'path';
 import {pathToFileURL} from 'url';

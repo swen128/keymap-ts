@@ -6,13 +6,13 @@
  */
 
 // Re-export all user-facing schemas and types
-export * from './schemas';
+export * from './schemas.js';
 
 // Re-export keyboard helpers
-export { glove80Layout, glove80Keymap } from './keyboards/glove80';
+export { glove80Layout, glove80Keymap } from './keyboards/glove80.js';
 
 // Re-export keycodes
-export { type KC } from './keycodes';
+export { type KC } from './keycodes.js';
 
 // Re-export helper functions
-export * from './helpers';
+export * from './helpers.js';

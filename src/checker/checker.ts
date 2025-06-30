@@ -8,7 +8,7 @@ import type {
   HoldTapDefinition,
   TapDanceDefinition,
   ModMorphDefinition
-} from '../dsl/schemas';
+} from '../dsl/schemas.js';
 import type { 
   CheckedBinding, 
   CheckedLayer,
@@ -23,7 +23,7 @@ import type {
   CheckedHoldTapDefinition,
   CheckedTapDanceDefinition,
   CheckedModMorphDefinition
-} from './types';
+} from './types.js';
 
 const syntheticMacroCounter = { value: 0 };
 

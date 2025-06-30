@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test';
-import type { Keymap } from '../dsl/schemas';
-import type { CheckedBinding } from './types';
-import { check } from './checker';
+import type { Keymap } from '../dsl/schemas.js';
+import type { CheckedBinding } from './types.js';
+import { check } from './checker.js';
 
 describe('checker', () => {
   it('should convert simple bindings correctly', () => {

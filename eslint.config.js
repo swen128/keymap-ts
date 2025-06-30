@@ -8,7 +8,7 @@ import eslintComments from 'eslint-plugin-eslint-comments';
 export default [
   js.configs.recommended,
   {
-    files: ['**/*.ts'],
+    files: ['src/**/*.ts'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -94,26 +94,26 @@ export default [
     },
   },
   {
-    files: ['**/*.ts'],
+    files: ['src/**/*.ts'],
     ignores: ['**/*.test.ts'],
     rules: {
       'functional/no-let': 'error',
     },
   },
   {
-    files: ['**/*.test.ts'],
+    files: ['src/**/*.test.ts'],
     rules: {
       'functional/no-throw-statements': 'off',
     },
   },
   {
-    files: ['**/cli.ts'],
+    files: ['src/**/cli.ts'],
     rules: {
       'no-console': 'off',
       'functional/no-throw-statements': 'off',
     },
   },
   {
-    ignores: ['node_modules/', 'dist/', 'build/', '*.js', '!eslint.config.js', 'vite.config.ts'],
+    ignores: ['node_modules/', 'dist/', 'build/', '*.js', '!eslint.config.js', 'vite.config.ts', 'playground/'],
   },
 ];

@@ -3,8 +3,8 @@
  */
 
 // Re-export everything from the DSL
-export * from './dsl';
+export * from './dsl/index.js';
 
 // Also export transpile for programmatic use
-export { transpile } from './transpiler';
-export type { TranspileResult, TranspileOutput } from './transpiler';
+export { transpile } from './transpiler.js';
+export type { TranspileResult, TranspileOutput } from './transpiler.js';

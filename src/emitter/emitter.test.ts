@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
-import { emit } from './emitter';
-import type { CheckedKeymap, CheckedBinding, CheckedHoldTapDefinition } from '../checker/types';
+import { emit } from './emitter.js';
+import type { CheckedKeymap, CheckedBinding, CheckedHoldTapDefinition } from '../checker/types.js';
 
 describe('emitter', () => {
   it('should emit includes when specified', () => {

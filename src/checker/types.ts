@@ -19,7 +19,7 @@ import type {
   MouseButtonType,
   BluetoothActionType,
   OutputTargetType
-} from '../dsl/schemas';
+} from '../dsl/schemas.js';
 
 /**
  * Bindings that can be used inside hold-tap, tap-dance, etc.
@@ -85,7 +85,7 @@ import type {
   HoldTapDefinition as BaseHoldTapDefinition,
   TapDanceDefinition as BaseTapDanceDefinition,
   ModMorphDefinition as BaseModMorphDefinition
-} from '../dsl/schemas.ts';
+} from '../dsl/schemas.js';
 
 /**
  * Extended behavior definitions with bindings field for ZMK emission
@@ -106,7 +106,7 @@ export interface CheckedModMorphDefinition extends BaseModMorphDefinition {
 /**
  * Re-export unchanged definitions
  */
-export type { StickyKeyDefinition, StickyLayerDefinition } from '../dsl/schemas.ts';
+export type { StickyKeyDefinition, StickyLayerDefinition } from '../dsl/schemas.js';
 
 /**
  * Union type for all custom behavior definitions

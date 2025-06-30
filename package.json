@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "dev": "bun --hot ./index.ts",
-    "build": "tsgo --project tsconfig.build.json",
+    "build": "tsgo",
     "postbuild": "chmod +x dist/cli.js",
     "typecheck": "tsgo --noEmit",
     "lint": "eslint .",
