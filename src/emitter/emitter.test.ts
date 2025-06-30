@@ -694,12 +694,7 @@ describe('emitter', () => {
           type: 'behavior',
           binding: {
             behavior: 'holdTap',
-            definition: {
-              compatible: 'zmk,behavior-hold-tap',
-              name: 'smart_move',
-              tappingTermMs: 150,
-              flavor: 'tap-preferred'
-            },
+            name: 'smart_move',
             holdBinding: { behavior: 'keyPress', code: { key: 'HOME', modifiers: ['LG'] } },
             tapBinding: { behavior: 'keyPress', code: { key: 'LEFT', modifiers: ['LA'] } }
           }
@@ -751,6 +746,39 @@ describe('emitter', () => {
     
     const output = emit(keymap);
     expect(output).toBe(expected);
+  });
+
+  it('should convert layer names to indices in macro actions', () => {
+    const keymap: CheckedKeymap = {
+      layers: [
+        { name: 'base', bindings: [] },
+        { name: 'nav', bindings: [] }
+      ],
+      macros: [{
+        name: 'layer_macro',
+        bindings: [
+          { type: 'tap', code: { key: 'A', modifiers: [] } },
+          { type: 'behavior', binding: { behavior: 'toLayer', layer: 0 } },
+          { type: 'behavior', binding: { behavior: 'momentaryLayer', layer: 1 } },
+          { type: 'behavior', binding: { behavior: 'toggleLayer', layer: 1 } },
+          { type: 'behavior', binding: { behavior: 'stickyLayer', layer: 0 } },
+          { type: 'behavior', binding: { behavior: 'layerTap', layer: 1, tap: { key: 'B', modifiers: [] } } }
+        ]
+      }],
+      behaviors: [],
+      combos: [],
+      conditionalLayers: []
+    };
+
+    const result = emit(keymap);
+    
+    expect(result).toContain('layer_macro: layer_macro {');
+    expect(result).toContain('bindings = <&kp A>');
+    expect(result).toContain(', <&to 0>');
+    expect(result).toContain(', <&mo 1>');
+    expect(result).toContain(', <&tog 1>');
+    expect(result).toContain(', <&sl 0>');
+    expect(result).toContain(', <&lt 1 B>');
   });
 
   it('should emit hold-tap with all properties including flavor, requirePriorIdleMs, and holdTriggerKeyPositions', () => {

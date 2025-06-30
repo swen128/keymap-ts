@@ -13,7 +13,8 @@ import type {
   CheckedBinding, 
   CheckedLayer,
   SimpleBinding,
-  SynthesizedMacro,
+  CheckedMacroDefinition,
+  CheckedMacroAction,
   ExtendedMacroAction,
   BehaviorMacroAction,
   ValidationError,
@@ -66,11 +67,19 @@ function bindingToMacroActions(binding: Binding): ExtendedMacroAction[] {
   return [action];
 }
 
-function createSyntheticMacro(binding: Binding): SynthesizedMacro {
+function checkedBindingToMacroActions(binding: CheckedBinding): CheckedMacroAction[] {
+  const action: CheckedMacroAction = {
+    type: 'behavior',
+    binding
+  };
+  return [action];
+}
+
+function createSyntheticMacro(binding: CheckedBinding, behaviorName: string): CheckedMacroDefinition {
   const currentCount = syntheticMacroCounter.value;
   syntheticMacroCounter.value += 1;
-  const name: `__synthetic_${string}_${number}` = `__synthetic_${binding.behavior}_${currentCount}`;
-  const actions = bindingToMacroActions(binding);
+  const name = `__synthetic_${behaviorName}_${currentCount}`;
+  const actions = checkedBindingToMacroActions(binding);
   
   return {
     name,
@@ -80,13 +89,13 @@ function createSyntheticMacro(binding: Binding): SynthesizedMacro {
 
 function checkBinding(
   binding: Binding, 
-  synthesizedMacros: SynthesizedMacro[],
+  synthesizedMacros: CheckedMacroDefinition[],
   errors: ValidationError[],
   path: string[],
   behaviorUsageMap: BehaviorUsageMap,
   layerNameToIndex: LayerNameToIndexMap
-): { binding: CheckedBinding; synthesizedMacros: SynthesizedMacro[] } {
-  const newSynthesizedMacros: SynthesizedMacro[] = [];
+): { binding: CheckedBinding; synthesizedMacros: CheckedMacroDefinition[] } {
+  const newCheckedMacroDefinitions: CheckedMacroDefinition[] = [];
 
   const simpleBinding = checkSimpleBinding(binding, layerNameToIndex);
   if (simpleBinding) {
@@ -133,11 +142,11 @@ function checkBinding(
         synthesizedMacros: []
       };
     case 'holdTap': {
-      const holdResult = checkBindingForNesting(binding.holdBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
-      newSynthesizedMacros.push(...holdResult.synthesizedMacros);
+      const holdResult = checkBindingForNesting(binding.holdBinding, [...synthesizedMacros, ...newCheckedMacroDefinitions], behaviorUsageMap, layerNameToIndex);
+      newCheckedMacroDefinitions.push(...holdResult.synthesizedMacros);
       
-      const tapResult = checkBindingForNesting(binding.tapBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
-      newSynthesizedMacros.push(...tapResult.synthesizedMacros);
+      const tapResult = checkBindingForNesting(binding.tapBinding, [...synthesizedMacros, ...newCheckedMacroDefinitions], behaviorUsageMap, layerNameToIndex);
+      newCheckedMacroDefinitions.push(...tapResult.synthesizedMacros);
       
       // Track which behaviors this hold-tap uses
       const usedBehaviors = behaviorUsageMap.get(binding.definition.name) || new Set();
@@ -152,7 +161,7 @@ function checkBinding(
           holdBinding: holdResult.binding,
           tapBinding: tapResult.binding
         },
-        synthesizedMacros: newSynthesizedMacros
+        synthesizedMacros: newCheckedMacroDefinitions
       };
     }
     case 'tapDance': {
@@ -161,8 +170,8 @@ function checkBinding(
       const usedBehaviors = behaviorUsageMap.get(binding.definition.name) || new Set();
       
       binding.bindings.forEach((b: Binding) => {
-        const result = checkBindingForNesting(b, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
-        newSynthesizedMacros.push(...result.synthesizedMacros);
+        const result = checkBindingForNesting(b, [...synthesizedMacros, ...newCheckedMacroDefinitions], behaviorUsageMap, layerNameToIndex);
+        newCheckedMacroDefinitions.push(...result.synthesizedMacros);
         checkedBindings.push(result.binding);
         usedBehaviors.add(getCheckedBindingBehaviorName(result.binding));
       });
@@ -175,15 +184,15 @@ function checkBinding(
           name: binding.definition.name,
           bindings: checkedBindings
         },
-        synthesizedMacros: newSynthesizedMacros
+        synthesizedMacros: newCheckedMacroDefinitions
       };
     }
     case 'modMorph': {
-      const defaultResult = checkBindingForNesting(binding.defaultBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
-      newSynthesizedMacros.push(...defaultResult.synthesizedMacros);
+      const defaultResult = checkBindingForNesting(binding.defaultBinding, [...synthesizedMacros, ...newCheckedMacroDefinitions], behaviorUsageMap, layerNameToIndex);
+      newCheckedMacroDefinitions.push(...defaultResult.synthesizedMacros);
       
-      const morphedResult = checkBindingForNesting(binding.morphedBinding, [...synthesizedMacros, ...newSynthesizedMacros], behaviorUsageMap, layerNameToIndex);
-      newSynthesizedMacros.push(...morphedResult.synthesizedMacros);
+      const morphedResult = checkBindingForNesting(binding.morphedBinding, [...synthesizedMacros, ...newCheckedMacroDefinitions], behaviorUsageMap, layerNameToIndex);
+      newCheckedMacroDefinitions.push(...morphedResult.synthesizedMacros);
       
       // Track which behaviors this mod-morph uses
       const usedBehaviors = behaviorUsageMap.get(binding.definition.name) || new Set();
@@ -199,7 +208,7 @@ function checkBinding(
           morphedBinding: morphedResult.binding,
           mods: binding.mods
         },
-        synthesizedMacros: newSynthesizedMacros
+        synthesizedMacros: newCheckedMacroDefinitions
       };
     }
     
@@ -346,10 +355,10 @@ function checkSimpleBinding(
 
 function checkBindingForNesting(
   binding: Binding,
-  existingMacros: SynthesizedMacro[],
+  existingMacros: CheckedMacroDefinition[],
   behaviorUsageMap: BehaviorUsageMap,
   layerNameToIndex: LayerNameToIndexMap
-): { binding: SimpleBinding; synthesizedMacros: SynthesizedMacro[] } {
+): { binding: SimpleBinding; synthesizedMacros: CheckedMacroDefinition[] } {
   const simpleBinding = checkSimpleBinding(binding, layerNameToIndex);
   
   if (simpleBinding) {
@@ -368,7 +377,7 @@ function checkBindingForNesting(
       const errors: ValidationError[] = [];
       const result = checkBinding(binding, existingMacros, errors, [], behaviorUsageMap, layerNameToIndex);
       // The binding will be wrapped in a synthetic macro
-      const syntheticMacro = createSyntheticMacro(binding);
+      const syntheticMacro = createSyntheticMacro(result.binding, binding.behavior);
       return {
         binding: { behavior: 'macro', macroName: syntheticMacro.name },
         synthesizedMacros: [syntheticMacro, ...result.synthesizedMacros]
@@ -391,7 +400,8 @@ function checkBindingForNesting(
           synthesizedMacros: []
         };
       }
-      const syntheticMacro = createSyntheticMacro(binding);
+      // These bindings are already valid CheckedBindings (no layer references to convert)
+      const syntheticMacro = createSyntheticMacro(binding, binding.behavior);
       return {
         binding: { behavior: 'macro', macroName: syntheticMacro.name },
         synthesizedMacros: [syntheticMacro]
@@ -429,8 +439,8 @@ function checkBindingForNesting(
 
 function findExistingSyntheticMacro(
   binding: Binding,
-  existingMacros: SynthesizedMacro[]
-): SynthesizedMacro | undefined {
+  existingMacros: CheckedMacroDefinition[]
+): CheckedMacroDefinition | undefined {
   const actions = bindingToMacroActions(binding);
   
   return existingMacros.find(macro => {
@@ -443,18 +453,18 @@ function findExistingSyntheticMacro(
 
 function checkLayer(
   layer: Layer,
-  synthesizedMacros: SynthesizedMacro[],
+  synthesizedMacros: CheckedMacroDefinition[],
   errors: ValidationError[],
   behaviorUsageMap: BehaviorUsageMap,
   layerNameToIndex: LayerNameToIndexMap
-): { layer: CheckedLayer; synthesizedMacros: SynthesizedMacro[] } {
-  const newSynthesizedMacros: SynthesizedMacro[] = [];
+): { layer: CheckedLayer; synthesizedMacros: CheckedMacroDefinition[] } {
+  const newCheckedMacroDefinitions: CheckedMacroDefinition[] = [];
   const checkedBindings: CheckedBinding[] = [];
   
   layer.bindings.forEach((binding, index) => {
     const path = ['layers', layer.name, 'bindings', index.toString()];
-    const result = checkBinding(binding, [...synthesizedMacros, ...newSynthesizedMacros], errors, path, behaviorUsageMap, layerNameToIndex);
-    newSynthesizedMacros.push(...result.synthesizedMacros);
+    const result = checkBinding(binding, [...synthesizedMacros, ...newCheckedMacroDefinitions], errors, path, behaviorUsageMap, layerNameToIndex);
+    newCheckedMacroDefinitions.push(...result.synthesizedMacros);
     checkedBindings.push(result.binding);
   });
   
@@ -463,7 +473,7 @@ function checkLayer(
       name: layer.name,
       bindings: checkedBindings
     },
-    synthesizedMacros: newSynthesizedMacros
+    synthesizedMacros: newCheckedMacroDefinitions
   };
 }
 
@@ -477,7 +487,7 @@ export function check(keymap: Keymap): CheckResult {
   resetSyntheticMacroCounter();
   
   const errors: ValidationError[] = [];
-  const allSynthesizedMacros: SynthesizedMacro[] = [];
+  const allCheckedMacroDefinitions: CheckedMacroDefinition[] = [];
   const checkedLayers: CheckedLayer[] = [];
   // Map to track behavior definitions and their used behaviors
   const behaviorUsageMap: BehaviorUsageMap = new Map();
@@ -634,12 +644,9 @@ export function check(keymap: Keymap): CheckResult {
       case 'stickyLayer':
       case 'macro': {
         // Process behavior actions within the macro
-        // TODO: Fix TypeScript type narrowing issue - binding should be narrowed to MacroBinding
-        // Currently using 'any' as a workaround for strict linting rules
-        const b = binding as any;
-        if (b.macro?.bindings) {
-          b.macro.bindings.forEach((action: any) => {
-            if (action.type === 'behavior' && action.binding) {
+        if (binding.behavior === 'macro') {
+          binding.macro.bindings.forEach((action) => {
+            if (action.type === 'behavior') {
               collectBehaviorDefinitions(action.binding);
             }
           });
@@ -669,8 +676,8 @@ export function check(keymap: Keymap): CheckResult {
       validateLayerReferences(binding, path);
       collectBehaviorDefinitions(binding);
     });
-    const result = checkLayer(layer, allSynthesizedMacros, errors, behaviorUsageMap, layerNameToIndex);
-    allSynthesizedMacros.push(...result.synthesizedMacros);
+    const result = checkLayer(layer, allCheckedMacroDefinitions, errors, behaviorUsageMap, layerNameToIndex);
+    allCheckedMacroDefinitions.push(...result.synthesizedMacros);
     checkedLayers.push(result.layer);
   });
   
@@ -686,6 +693,45 @@ export function check(keymap: Keymap): CheckResult {
   }
   // Extract user-defined macros from macro bindings
   const extractedMacros: MacroDefinition[] = [];
+  const processedMacros: CheckedMacroDefinition[] = [];
+  
+  // Process macro behavior actions to track usage and convert layer names
+  function processMacroBehaviorActions(macro: MacroDefinition): CheckedMacroDefinition {
+    const processedBindings: CheckedMacroAction[] = [];
+    
+    macro.bindings.forEach(action => {
+      if (action.type === 'behavior') {
+        // Process the behavior action to track usage and convert layer names
+        const result = checkBinding(
+          action.binding, 
+          [...allCheckedMacroDefinitions, ...processedMacros], 
+          errors, 
+          ['macros', macro.name], 
+          behaviorUsageMap, 
+          layerNameToIndex
+        );
+        processedMacros.push(...result.synthesizedMacros);
+        collectBehaviorDefinitions(action.binding);
+        
+        // Store the processed binding with converted layer indices
+        processedBindings.push({
+          type: 'behavior',
+          binding: result.binding
+        });
+      } else {
+        // Keep other action types as-is (they're already in checked format)
+        processedBindings.push(action);
+      }
+    });
+    
+    // Return a new macro with processed bindings
+    return {
+      name: macro.name,
+      bindings: processedBindings,
+      ...(macro.waitMs !== undefined ? { waitMs: macro.waitMs } : {}),
+      ...(macro.tapMs !== undefined ? { tapMs: macro.tapMs } : {})
+    };
+  }
   
   function extractMacros(binding: Binding): void {
     switch (binding.behavior) {
@@ -743,7 +789,22 @@ export function check(keymap: Keymap): CheckResult {
     extractMacros(combo.binding);
   });
   
-  const allMacros = [...extractedMacros, ...allSynthesizedMacros];
+  // Deduplicate extracted macros by name
+  const deduplicatedMacros = new Map<string, MacroDefinition>();
+  extractedMacros.forEach(macro => {
+    if (!deduplicatedMacros.has(macro.name)) {
+      deduplicatedMacros.set(macro.name, macro);
+    }
+  });
+  
+  // Process macro behavior actions to track usage and convert layer names
+  const processedUserMacros: CheckedMacroDefinition[] = [];
+  deduplicatedMacros.forEach(macro => {
+    const processedMacro = processMacroBehaviorActions(macro);
+    processedUserMacros.push(processedMacro);
+  });
+  
+  const allMacros = [...processedUserMacros, ...allCheckedMacroDefinitions, ...processedMacros];
   
   // Convert collected behavior definitions to final format with bindings field
   const behaviorDefinitions: BehaviorDefinition[] = [];
@@ -755,10 +816,23 @@ export function check(keymap: Keymap): CheckResult {
     switch (def.compatible) {
       case 'zmk,behavior-hold-tap': {
         // For hold-tap, we need to ensure exactly 2 behaviors in the bindings array
-        // Find the first instance to get the order
-        const firstUsage = keymap.layers
+        // Find the first instance to get the order - check layers first, then macros
+        const firstUsageFromLayers = keymap.layers
           .flatMap(layer => layer.bindings)
           .find(binding => binding.behavior === 'holdTap' && binding.definition?.name === name);
+        
+        // If not found in layers, search in macros
+        const firstUsage = firstUsageFromLayers || ((): Binding | undefined => {
+          for (const macro of deduplicatedMacros.values()) {
+            for (const action of macro.bindings) {
+              if (action.type === 'behavior' && action.binding.behavior === 'holdTap' && 
+                  action.binding.definition?.name === name) {
+                return action.binding;
+              }
+            }
+          }
+          return undefined;
+        })();
         
         const finalBindings = firstUsage && firstUsage.behavior === 'holdTap'
           ? [

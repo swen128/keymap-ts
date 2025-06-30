@@ -3,7 +3,8 @@ import type {
   CheckedBinding,
   CheckedKeymap,
   CheckedLayer,
-  ExtendedMacroAction
+  CheckedMacroDefinition,
+  CheckedMacroAction
 } from '../checker/types';
 import type {Binding, Combo, ConditionalLayer, KeyWithModifiers} from '../dsl/schemas';
 
@@ -291,11 +292,11 @@ function emitBindingReference(binding: Binding): string {
   }
 }
 
-function emitMacroAction(action: ExtendedMacroAction): string {
+function emitMacroAction(action: CheckedMacroAction): string {
   switch (action.type) {
     case 'behavior':
-      // This is a BehaviorMacroAction
-      return `<${emitBindingReference(action.binding)}>`;
+      // This is a CheckedMacroBehaviorAction with CheckedBinding
+      return `<${emitBehaviorReference(action.binding)}>`;
     
     case 'tap':
       return `<&kp ${formatKeyWithModifiers(action.code)}>`;
@@ -320,7 +321,7 @@ function emitMacroAction(action: ExtendedMacroAction): string {
   }
 }
 
-function emitMacro(macro: { name: string; label?: string; bindings: ExtendedMacroAction[]; waitMs?: number; tapMs?: number }, indent: string = '    '): string {
+function emitMacro(macro: CheckedMacroDefinition, indent: string = '    '): string {
   const lines: string[] = [];
   lines.push(`${indent}${macro.name}: ${macro.name} {`);
   

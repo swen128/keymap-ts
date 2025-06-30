@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import type { Keymap } from '../dsl/schemas';
+import type { CheckedBinding } from './types';
 import { check } from './checker';
 
 describe('checker', () => {
@@ -481,6 +482,123 @@ describe('checker', () => {
     if (!result.success) {
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]?.message).toContain('Layer "NonExistent" does not exist');
+    }
+  });
+
+  it('should deduplicate macros that are used multiple times', () => {
+    const macro1 = { 
+      name: 'test_macro', 
+      bindings: [{ type: 'tap' as const, code: { key: 'A', modifiers: [] } }] 
+    };
+    
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          { behavior: 'macro', macro: macro1 },
+          { behavior: 'macro', macro: macro1 },  // Same macro used twice
+          {
+            behavior: 'holdTap',
+            definition: {
+              compatible: 'zmk,behavior-hold-tap' as const,
+              name: 'ht1',
+              tappingTermMs: 200
+            },
+            tapBinding: { behavior: 'macro', macro: macro1 },  // Same macro in hold-tap
+            holdBinding: { behavior: 'keyPress', code: { key: 'LSHFT', modifiers: [] } }
+          }
+        ]
+      }]
+    };
+    
+    const result = check(keymap);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      // Should only have one instance of test_macro
+      const testMacros = result.keymap.macros.filter(m => m.name === 'test_macro');
+      expect(testMacros).toHaveLength(1);
+    }
+  });
+
+  it('should track behavior usage for behaviors used within macros', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          {
+            behavior: 'macro',
+            macro: {
+              name: 'test_macro',
+              bindings: [{
+                type: 'behavior',
+                binding: {
+                  behavior: 'holdTap',
+                  definition: {
+                    compatible: 'zmk,behavior-hold-tap' as const,
+                    name: 'ht_in_macro',
+                    tappingTermMs: 200
+                  },
+                  tapBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
+                  holdBinding: { behavior: 'momentaryLayer', layer: 'default' }
+                }
+              }]
+            }
+          }
+        ]
+      }]
+    };
+    
+    const result = check(keymap);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      // Find the ht_in_macro behavior definition
+      const htBehavior = result.keymap.behaviors.find(b => b.name === 'ht_in_macro');
+      expect(htBehavior).toBeDefined();
+      if (htBehavior && htBehavior.compatible === 'zmk,behavior-hold-tap') {
+        // Should have bindings array with kp and mo
+        expect(htBehavior.bindings).toEqual(['mo', 'kp']);
+      } else {
+        throw new Error('Hold-tap behavior should have bindings property');
+      }
+    }
+  });
+
+  it('should convert layer names to indices in macro actions', () => {
+    const keymap: Keymap = {
+      layers: [
+        {
+          name: 'Base',
+          bindings: [
+            {
+              behavior: 'macro',
+              macro: {
+                name: 'copy_selection',
+                bindings: [
+                  { type: 'tap', code: { key: 'C', modifiers: ['LG'] } },
+                  { type: 'behavior', binding: { behavior: 'toLayer', layer: 'Base' } }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    };
+    
+    const result = check(keymap);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      // Find the copy_selection macro
+      const macro = result.keymap.macros.find(m => m.name === 'copy_selection');
+      expect(macro).toBeDefined();
+      if (macro) {
+        // The behavior action should have the layer converted to index 0
+        const behaviorAction = macro.bindings.find(b => b.type === 'behavior');
+        expect(behaviorAction).toBeDefined();
+        if (behaviorAction && behaviorAction.type === 'behavior') {
+          const expectedBinding: CheckedBinding = { behavior: 'toLayer', layer: 0 };
+          expect(behaviorAction.binding).toEqual(expectedBinding);
+        }
+      }
     }
   });
 

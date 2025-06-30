@@ -14,13 +14,12 @@ import type {
   Binding, 
   Combo, 
   ConditionalLayer, 
-  MacroDefinition,
   MacroAction,
   KeyWithModifiers,
   MouseButtonType,
   BluetoothActionType,
   OutputTargetType
-} from '../dsl/schemas.ts';
+} from '../dsl/schemas';
 
 /**
  * Bindings that can be used inside hold-tap, tap-dance, etc.
@@ -123,7 +122,7 @@ export type BehaviorDefinition =
  */
 export interface CheckedKeymap {
   layers: CheckedLayer[];
-  macros: (MacroDefinition | SynthesizedMacro)[];
+  macros: CheckedMacroDefinition[];
   behaviors: BehaviorDefinition[];
   combos: Combo[];
   conditionalLayers: ConditionalLayer[];
@@ -131,18 +130,78 @@ export interface CheckedKeymap {
 }
 
 /**
- * A synthetic macro created to wrap complex behaviors
+ * A checked macro definition with layer indices converted
  */
-export interface SynthesizedMacro {
-  /** Synthetic macros have special naming convention */
-  name: `__synthetic_${string}_${number}`;
-  bindings: ExtendedMacroAction[];
+export interface CheckedMacroDefinition {
+  name: string;
+  label?: string;
+  bindings: CheckedMacroAction[];
   waitMs?: number;
   tapMs?: number;
 }
 
+
 /**
- * Macro action for behaviors that need to be wrapped
+ * Checked version of macro tap action
+ */
+export interface CheckedMacroTapAction {
+  type: 'tap';
+  code: KeyWithModifiers;
+}
+
+/**
+ * Checked version of macro press action
+ */
+export interface CheckedMacroPressAction {
+  type: 'press';
+  code: KeyWithModifiers;
+}
+
+/**
+ * Checked version of macro release action
+ */
+export interface CheckedMacroReleaseAction {
+  type: 'release';
+  code: KeyWithModifiers;
+}
+
+/**
+ * Checked version of macro wait action
+ */
+export interface CheckedMacroWaitAction {
+  type: 'wait';
+  ms: number;
+}
+
+/**
+ * Checked version of macro control actions
+ */
+export type CheckedMacroControlAction = 
+  | { type: 'pauseForRelease' }
+  | { type: 'tapTime'; ms: number }
+  | { type: 'waitTime'; ms: number };
+
+/**
+ * Checked version of macro behavior action
+ */
+export interface CheckedMacroBehaviorAction {
+  type: 'behavior';
+  binding: CheckedBinding;
+}
+
+/**
+ * A checked macro action
+ */
+export type CheckedMacroAction = 
+  | CheckedMacroTapAction
+  | CheckedMacroPressAction
+  | CheckedMacroReleaseAction
+  | CheckedMacroWaitAction
+  | CheckedMacroControlAction
+  | CheckedMacroBehaviorAction;
+
+/**
+ * Macro action for behaviors that need to be wrapped (input type)
  */
 export interface BehaviorMacroAction {
   type: 'behavior';
@@ -150,7 +209,7 @@ export interface BehaviorMacroAction {
 }
 
 /**
- * Extended macro action that includes behavior wrapping
+ * Extended macro action that includes behavior wrapping (input type)
  */
 export type ExtendedMacroAction = MacroAction | BehaviorMacroAction;
 
