@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
+import {Result, ok, err, ResultAsync} from 'neverthrow';
 import {transpile} from './transpiler.js';
 import {writeFileSync} from 'fs';
 import {resolve} from 'path';
 import {pathToFileURL} from 'url';
-import {z} from 'zod';
+import {z} from 'zod/v4';
+import {safeParse} from './utils/safeParse.js';
 
 function showHelp(): void {
   console.log(`
@@ -28,60 +30,56 @@ The keymap file should export a default object with the keymap configuration.
 `);
 }
 
-type ParsedArgs =
-  | { command: 'build'; inputFile?: string; outputFile?: string }
-  | { command: 'help' }
-  | { command: 'error'; message: string };
+type BuildCommand = { command: 'build'; inputFile: string; outputFile?: string };
+type HelpCommand = { command: 'help' };
+type ParsedArgs = BuildCommand | HelpCommand;
 
-function parseArgs(args: string[]): ParsedArgs {
+function parseArgs(args: string[]): Result<ParsedArgs, string> {
   if (args.includes('--help') || args.includes('-h')) {
-    return {command: 'help'};
+    return ok({command: 'help'});
   }
 
   if (args.length === 0) {
-    return {
-      command: 'error',
-      message: 'No command specified\nRun with --help for usage information'
-    };
+    return err('No command specified\nRun with --help for usage information');
   }
 
-  const command = args[0]
+  const command = args[0];
 
   if (command === 'build') {
-    return {
+    const inputFile = args[1];
+    if (inputFile === undefined) {
+      return err('Input file is required for build command');
+    }
+    return ok({
       command: 'build',
-      inputFile: args[1],
+      inputFile,
       outputFile: args[2]
-    };
+    });
   }
 
-
-  return {
-    command: 'error',
-    message: `Unknown command '${command}'\nRun with --help for usage information`
-  };
+  return err(`Unknown command '${command}'\nRun with --help for usage information`);
 }
 
-// Schema for ES module with default export
 const ModuleSchema = z.object({
   default: z.unknown()
 });
 
-async function loadDefaultExport(filePath: string): Promise<unknown> {
+function loadDefaultExport(filePath: string): ResultAsync<unknown, string> {
   const absolutePath = resolve(filePath);
   const fileUrl = pathToFileURL(absolutePath).href;
 
-  // Dynamic import
-  const module: unknown = await import(fileUrl);
-
-  // Try to parse as ES module with default export
-  const moduleResult = ModuleSchema.safeParse(module);
-  if (moduleResult.success) {
-    return moduleResult.data.default;
-  }
-
-  // Otherwise return the module itself (could be CommonJS or direct export)
-  return module;
+  return ResultAsync.fromPromise(
+    import(fileUrl),
+    (error) => `Failed to load file: ${error instanceof Error ? error.message : 'Unknown error'}`
+  ).map((module: unknown) => {
+    // Try to parse as ES module with default export
+    const moduleResult = safeParse(ModuleSchema)(module);
+    if (moduleResult.isOk()) {
+      return moduleResult.value.default;
+    }
+    // Otherwise return the module itself (could be CommonJS or direct export)
+    return module;
+  });
 }
 
 function formatError(error: { path?: string[]; message: string }): string {
@@ -89,50 +87,60 @@ function formatError(error: { path?: string[]; message: string }): string {
   return `  ${path ? `[${path}] ` : ''}${error.message}`;
 }
 
+function writeOutput(content: string, outputFile?: string): Result<void, string> {
+  if (outputFile !== undefined) {
+    try {
+      writeFileSync(outputFile, content, 'utf-8');
+      console.log(`Successfully wrote output to ${outputFile}`);
+      return ok(undefined);
+    } catch (error) {
+      return err(`Failed to write file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  } else {
+    console.log(content);
+    return ok(undefined);
+  }
+}
+
+async function executeBuild(command: BuildCommand): Promise<Result<void, string>> {
+  const loadResult = await loadDefaultExport(command.inputFile);
+  
+  if (loadResult.isErr()) {
+    return err(loadResult.error);
+  }
+  
+  const transpileResult = transpile(loadResult.value);
+  
+  if (transpileResult.isErr()) {
+    console.error('Transpilation failed:');
+    transpileResult.error.forEach(error => console.error(formatError(error)));
+    return err('Transpilation failed');
+  }
+  
+  return writeOutput(transpileResult.value, command.outputFile);
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  const options = parseArgs(args);
+  const parseResult = parseArgs(args);
 
-  switch (options.command) {
+  if (parseResult.isErr()) {
+    console.error(`Error: ${parseResult.error}`);
+    throw new Error('Invalid command');
+  }
+
+  const command = parseResult.value;
+
+  switch (command.command) {
     case 'help':
       showHelp();
       return;
 
-    case 'error':
-      console.error(`Error: ${options.message}`);
-      throw new Error('Invalid command');
-
-
     case 'build': {
-      if (options.inputFile === undefined) {
-        console.error('Error: Input file is required for build command');
-        throw new Error('Missing input file');
-      }
-
-      try {
-        const keymap = await loadDefaultExport(options.inputFile);
-        const result = transpile(keymap);
-
-        if (result.isErr()) {
-          console.error('Transpilation failed:');
-          result.error.forEach(error => {
-            console.error(formatError(error));
-          });
-          throw new Error('Transpilation failed');
-        }
-
-        if (options.outputFile !== undefined) {
-          writeFileSync(options.outputFile, result.value, 'utf-8');
-          console.log(`Successfully wrote output to ${options.outputFile}`);
-        } else {
-          console.log(result.value);
-        }
-      } catch (error) {
-        if (error instanceof Error && error.message === 'Transpilation failed') {
-          throw error;
-        }
-        console.error(`Failed to load file: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        throw new Error('Failed to load file');
+      const result = await executeBuild(command);
+      if (result.isErr()) {
+        console.error(result.error);
+        throw new Error(result.error);
       }
       break;
     }
