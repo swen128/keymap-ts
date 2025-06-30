@@ -8,22 +8,21 @@ import {z} from 'zod';
 
 function showHelp(): void {
   console.log(`
-ZMK Keymap Transpiler
+keymap-ts - TypeScript DSL for ZMK Keymaps
 
 Usage: 
-  keymap-transpiler <command> [options]
+  kts <command> [options]
 
 Commands:
-  build <input-file> [output-file]   Build a keymap file
-  preview                            Preview mode (not implemented yet)
+  build <input-file> [output-file]   Transpile a keymap file to ZMK devicetree format
 
 Options:
   -h, --help   Show this help message
 
 Examples:
-  keymap-transpiler build keymap.js keymap.dtsi
-  keymap-transpiler build keymap.ts > keymap.dtsi
-  keymap-transpiler build keymap.ts
+  kts build keymap.ts keymap.keymap
+  kts build keymap.ts > my-keyboard.keymap
+  kts build keymap.ts
 
 The keymap file should export a default object with the keymap configuration.
 `);
@@ -31,7 +30,6 @@ The keymap file should export a default object with the keymap configuration.
 
 type ParsedArgs =
   | { command: 'build'; inputFile?: string; outputFile?: string }
-  | { command: 'preview' }
   | { command: 'help' }
   | { command: 'error'; message: string };
 
@@ -57,9 +55,6 @@ function parseArgs(args: string[]): ParsedArgs {
     };
   }
 
-  if (command === 'preview') {
-    return {command: 'preview'};
-  }
 
   return {
     command: 'error',
@@ -107,9 +102,6 @@ async function main(): Promise<void> {
       console.error(`Error: ${options.message}`);
       throw new Error('Invalid command');
 
-    case 'preview':
-      console.error('Error: Preview command is not implemented yet');
-      throw new Error('Not implemented');
 
     case 'build': {
       if (options.inputFile === undefined) {

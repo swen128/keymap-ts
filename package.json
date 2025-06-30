@@ -20,8 +20,6 @@
     "lint": "eslint .",
     "knip": "knip",
     "check": "concurrently \"bun typecheck\" \"bun test\" \"bun lint\" \"bun knip\"",
-    "preview": "bun run src/cli.ts preview",
-    "build:keymap": "bun run src/cli.ts build",
     "prepare": "husky",
     "prepublishOnly": "bun check && bun run build"
   },
