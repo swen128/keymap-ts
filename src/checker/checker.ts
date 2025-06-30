@@ -30,6 +30,7 @@ function resetSyntheticMacroCounter(): void {
   syntheticMacroCounter.value = 0;
 }
 
+
 // Get the ZMK behavior name for a checked simple binding
 function getCheckedBindingBehaviorName(binding: SimpleBinding): string {
   switch (binding.behavior) {
@@ -631,7 +632,20 @@ export function check(keymap: Keymap): CheckResult {
       case 'momentaryLayer':
       case 'toggleLayer':
       case 'stickyLayer':
-      case 'macro':
+      case 'macro': {
+        // Process behavior actions within the macro
+        // TODO: Fix TypeScript type narrowing issue - binding should be narrowed to MacroBinding
+        // Currently using 'any' as a workaround for strict linting rules
+        const b = binding as any;
+        if (b.macro?.bindings) {
+          b.macro.bindings.forEach((action: any) => {
+            if (action.type === 'behavior' && action.binding) {
+              collectBehaviorDefinitions(action.binding);
+            }
+          });
+        }
+        break;
+      }
       case 'mouseButton':
       case 'mouseMove':
       case 'mouseScroll':

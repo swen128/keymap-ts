@@ -267,7 +267,22 @@ function emitBindingReference(binding: Binding): string {
     case 'macro':
       // Should not appear here, but handle it
       return `&${binding.macro.name}`;
-    case 'holdTap':
+    case 'holdTap': {
+      // Extract parameters for the hold-tap behavior
+      const holdRef = emitBindingReference(binding.holdBinding);
+      const tapRef = emitBindingReference(binding.tapBinding);
+      
+      // Extract just the parameter part (after the behavior name)
+      const extractParam = (ref: string): string => {
+        const parts = ref.split(' ');
+        return parts.length > 1 ? parts.slice(1).join(' ') : parts[0]?.substring(1) ?? '';
+      };
+      
+      const holdParam = extractParam(holdRef);
+      const tapParam = extractParam(tapRef);
+      
+      return `&${binding.definition.name} ${holdParam} ${tapParam}`;
+    }
     case 'tapDance':
     case 'modMorph':
       // These complex behaviors should have been synthesized into macros by the checker
@@ -357,6 +372,16 @@ function emitBehaviorDefinition(def: BehaviorDefinition, indent: string = '    '
       }
       if (def.holdWhileUndecided !== undefined) {
         lines.push(`${indent}    hold-while-undecided;`);
+      }
+      if (def.flavor !== undefined) {
+        lines.push(`${indent}    flavor = "${def.flavor}";`);
+      }
+      if (def.requirePriorIdleMs !== undefined) {
+        lines.push(`${indent}    require-prior-idle-ms = <${def.requirePriorIdleMs}>;`);
+      }
+      if (def.holdTriggerKeyPositions !== undefined && def.holdTriggerKeyPositions.length > 0) {
+        const positions = def.holdTriggerKeyPositions.join(' ');
+        lines.push(`${indent}    hold-trigger-key-positions = <${positions}>;`);
       }
       break;
     }

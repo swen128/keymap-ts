@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import { emit } from './emitter';
-import type { CheckedKeymap, CheckedBinding } from '../checker/types';
+import type { CheckedKeymap, CheckedBinding, CheckedHoldTapDefinition } from '../checker/types';
 
 describe('emitter', () => {
   it('should emit includes when specified', () => {
@@ -672,6 +672,145 @@ describe('emitter', () => {
             &kt CAPS &sk LSHFT &mt LCTRL ESC &lt 1 SPC &to 2 &tog 3 &sl 4 &none &caps_word &key_repeat
             &mkp MB1 &mmv MOVE_X(10) MOVE_Y(-5) &msc SCRL_X(0) SCRL_Y(1) &sys_reset &bootloader &bt BT_CLR &out OUT_TOG &rgb_ug RGB_COLOR_HSB 128 100 50 &bl BL_SET 75 &ext_power EP_TOG
             &soft_off 5000 &studio_unlock
+        >;
+    };
+
+  };
+};`;
+    
+    const output = emit(keymap);
+    expect(output).toBe(expected);
+  });
+
+  it('should emit macros with hold-tap behaviors correctly', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      macros: [{
+        name: 'smart_left',
+        bindings: [{
+          type: 'behavior',
+          binding: {
+            behavior: 'holdTap',
+            definition: {
+              compatible: 'zmk,behavior-hold-tap',
+              name: 'smart_move',
+              tappingTermMs: 150,
+              flavor: 'tap-preferred'
+            },
+            holdBinding: { behavior: 'keyPress', code: { key: 'HOME', modifiers: ['LG'] } },
+            tapBinding: { behavior: 'keyPress', code: { key: 'LEFT', modifiers: ['LA'] } }
+          }
+        }]
+      }],
+      behaviors: [{
+        compatible: 'zmk,behavior-hold-tap',
+        name: 'smart_move',
+        tappingTermMs: 150,
+        flavor: 'tap-preferred',
+        bindings: ['kp', 'kp']
+      } satisfies CheckedHoldTapDefinition],
+      combos: [],
+      conditionalLayers: []
+    };
+    
+    const expected = `/ {
+  behaviors {
+    smart_move: smart_move {
+        compatible = "zmk,behavior-hold-tap";
+        label = "SMART_MOVE";
+        #binding-cells = <2>;
+        bindings = <&kp>, <&kp>;
+        tapping-term-ms = <150>;
+        flavor = "tap-preferred";
+    };
+
+  };
+
+  macros {
+    smart_left: smart_left {
+        compatible = "zmk,behavior-macro";
+        #binding-cells = <0>;
+        bindings = <&smart_move LG(HOME) LA(LEFT)>;
+    };
+
+  };
+
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+        >;
+    };
+
+  };
+};`;
+    
+    const output = emit(keymap);
+    expect(output).toBe(expected);
+  });
+
+  it('should emit hold-tap with all properties including flavor, requirePriorIdleMs, and holdTriggerKeyPositions', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          {
+            behavior: 'holdTap',
+            name: 'lt_num',
+            holdBinding: { behavior: 'momentaryLayer', layer: 1 },
+            tapBinding: { behavior: 'keyPress', code: { key: 'D', modifiers: [] } }
+          }
+        ]
+      }, {
+        name: 'number',
+        bindings: []
+      }],
+      macros: [],
+      behaviors: [{
+        compatible: 'zmk,behavior-hold-tap',
+        name: 'lt_num',
+        tappingTermMs: 170,
+        quickTapMs: 300,
+        flavor: 'tap-preferred',
+        requirePriorIdleMs: 100,
+        holdTriggerKeyPositions: [60, 59, 41, 42, 43, 61, 31, 30, 29, 44, 62],
+        bindings: ['mo', 'kp']
+      } satisfies CheckedHoldTapDefinition],
+      combos: [],
+      conditionalLayers: []
+    };
+    
+    const expected = `/ {
+  behaviors {
+    lt_num: lt_num {
+        compatible = "zmk,behavior-hold-tap";
+        label = "LT_NUM";
+        #binding-cells = <2>;
+        bindings = <&mo>, <&kp>;
+        tapping-term-ms = <170>;
+        quick-tap-ms = <300>;
+        flavor = "tap-preferred";
+        require-prior-idle-ms = <100>;
+        hold-trigger-key-positions = <60 59 41 42 43 61 31 30 29 44 62>;
+    };
+
+  };
+
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+            &lt_num 1 D
+        >;
+    };
+
+    number_layer {
+        bindings = <
         >;
     };
 
