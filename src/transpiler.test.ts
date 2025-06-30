@@ -264,4 +264,55 @@ describe('transpiler', () => {
       expect(result.output).toBe(expected);
     }
   });
+
+  it('should validate includes for invalid characters', () => {
+    const keymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      includes: [
+        'behaviors.dtsi',
+        'file\nwith\nnewlines.h',
+        'file with trailing space ',
+        ' file with leading space',
+        'file"with"quotes.h',
+      ]
+    };
+    
+    const result = transpile(keymap);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const errorMessages = result.errors.map(e => e.message);
+      expect(errorMessages).toContain('Include path must not contain line breaks');
+      expect(errorMessages).toContain('Include path must not have leading or trailing whitespace');
+      expect(errorMessages).toContain('Include path must not contain quotes');
+    }
+  });
+
+  it('should accept valid includes', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      includes: [
+        'behaviors.dtsi',
+        'dt-bindings/zmk/keys.h',
+        'dt-bindings/zmk/bt.h',
+        'custom/behaviors.dtsi',
+        '../shared/macros.dtsi'
+      ]
+    };
+    
+    const result = transpile(keymap);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.output).toContain('#include <behaviors.dtsi>');
+      expect(result.output).toContain('#include <dt-bindings/zmk/keys.h>');
+      expect(result.output).toContain('#include <dt-bindings/zmk/bt.h>');
+      expect(result.output).toContain('#include <custom/behaviors.dtsi>');
+      expect(result.output).toContain('#include <../shared/macros.dtsi>');
+    }
+  });
 });

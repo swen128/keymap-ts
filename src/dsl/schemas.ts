@@ -432,10 +432,29 @@ export const LayerSchema = z.object({
 });
 export type Layer = z.infer<typeof LayerSchema>;
 
+// Include validation
+const IncludeSchema = z.string()
+  .refine(
+    (val) => !val.includes('\n') && !val.includes('\r'),
+    { message: 'Include path must not contain line breaks' }
+  )
+  .refine(
+    (val) => !val.includes('"') && !val.includes("'") && !val.includes('`'),
+    { message: 'Include path must not contain quotes' }
+  )
+  .refine(
+    (val) => val.trim() !== '',
+    { message: 'Include path must not be empty' }
+  )
+  .refine(
+    (val) => val === val.trim(),
+    { message: 'Include path must not have leading or trailing whitespace' }
+  );
+
 export const KeymapSchema = z.object({
   layers: z.array(LayerSchema),
   combos: z.array(ComboSchema).optional(),
   conditionalLayers: z.array(ConditionalLayerSchema).optional(),
-  includes: z.array(z.string()).optional(),
+  includes: z.array(IncludeSchema).optional(),
 });
 export type Keymap = z.infer<typeof KeymapSchema>;
