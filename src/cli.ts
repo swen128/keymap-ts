@@ -5,8 +5,8 @@ import {transpile, type TranspileError} from './transpiler.js';
 import {writeFileSync} from 'fs';
 import {resolve} from 'path';
 import {pathToFileURL} from 'url';
-import {z} from 'zod/v4';
 import {safeParse} from './utils/safeParse.js';
+import {validateModule} from './dsl/validators.js';
 
 function showHelp(): void {
   console.log(`
@@ -59,10 +59,6 @@ function parseArgs(args: string[]): Result<ParsedArgs, string> {
   return err(`Unknown command '${command}'\nRun with --help for usage information`);
 }
 
-const ModuleSchema = z.object({
-  default: z.unknown(),
-});
-
 const importFile = (filePath: string): ResultAsync<unknown, string> =>
   ResultAsync.fromPromise(
     import((pathToFileURL(resolve(filePath)).href)),
@@ -70,7 +66,7 @@ const importFile = (filePath: string): ResultAsync<unknown, string> =>
   )
 
 const loadDefaultExport = (mod: unknown): Result<unknown, string> =>
-  safeParse(ModuleSchema)(mod)
+  safeParse(validateModule)(mod)
     .map(data => data.default)
     .mapErr(() => "The module does not have the default export.")
 

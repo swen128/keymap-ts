@@ -283,10 +283,21 @@ describe('transpiler', () => {
     const result = transpile(keymap);
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
+      // Verify we have the expected number of errors
+      expect(result.error.length).toBe(2);
+      
+      // Verify error paths
+      const errorPaths = result.error.map(e => e.path || []);
+      expect(errorPaths).toContainEqual(['includes[1]']); // file with newlines
+      expect(errorPaths).toContainEqual(['includes[4]']); // file with quotes
+      
+      // Verify all errors are about the pattern validation
       const errorMessages = result.error.map(e => e.message);
-      expect(errorMessages).toContain('Include path must not contain line breaks');
-      expect(errorMessages).toContain('Include path must not have leading or trailing whitespace');
-      expect(errorMessages).toContain('Include path must not contain quotes');
+      errorMessages.forEach(msg => {
+        expect(msg).toMatch(/string & Pattern<".*">/);
+        // The pattern should exclude newlines, quotes, etc.
+        expect(msg).toContain(String.raw`^[^\\n\\r\"'` + '`]+$');
+      });
     }
   });
 

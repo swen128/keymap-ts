@@ -14,24 +14,25 @@
   ],
   "scripts": {
     "dev": "bun --hot ./index.ts",
-    "build": "tsgo",
+    "build": "tspc",
     "postbuild": "chmod +x dist/cli.js",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "tspc --noEmit",
     "lint": "eslint .",
     "knip": "knip",
     "check": "concurrently \"bun typecheck\" \"bun test\" \"bun lint\" \"bun knip\"",
-    "prepare": "husky",
+    "prepare": "ts-patch install && husky",
     "prepublishOnly": "bun check && bun run build"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@ryoppippi/unplugin-typia": "^2.6.5",
     "@types/bun": "^1.2.17",
-    "@typescript/native-preview": "^7.0.0-dev.20250628.1",
     "concurrently": "^9.2.0",
     "husky": "^9.1.7",
     "knip": "^5.61.3",
-    "typescript": "^5.8.3"
+    "ts-patch": "^3.3.0",
+    "typescript": "~5.8.3"
   },
   "dependencies": {
     "@eslint/js": "^9.30.0",
@@ -42,6 +43,6 @@
     "eslint-plugin-functional": "^9.0.2",
     "eslint-plugin-unicorn": "^59.0.1",
     "neverthrow": "^8.2.0",
-    "zod": "^3.25.67"
+    "typia": "^9.3.1"
   }
 }

@@ -1,5 +1,5 @@
 import {Result} from 'neverthrow';
-import {KeymapSchema} from './dsl/schemas.js';
+import {validateKeymap} from './dsl/validators.js';
 import {check} from './checker/checker.js';
 import {emit} from './emitter/emitter.js';
 import {safeParse} from './utils/safeParse.js';
@@ -16,7 +16,7 @@ export type TranspileError = {
  * @returns The transpilation result with either the output or errors
  */
 export function transpile(input: unknown): Result<string, TranspileError[]> {
-  return safeParse(KeymapSchema)(input)
+  return safeParse(validateKeymap)(input)
     .andThen(check)
     .map(emit);
 }

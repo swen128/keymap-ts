@@ -1,5 +1,5 @@
 import {Result, ok, err} from 'neverthrow';
-import type {z} from 'zod/v4';
+import type {IValidation} from 'typia';
 
 export type ParseError = {
   path: string[];
@@ -7,19 +7,19 @@ export type ParseError = {
 };
 
 /**
- * Creates a safe parser function from a Zod schema that returns a neverthrow Result
+ * Creates a safe parser function from a Typia validator that returns a neverthrow Result
  */
-export const safeParse = <T>(schema: z.ZodSchema<T>) =>
+export const safeParse = <T>(validator: (input: unknown) => IValidation<T>) =>
   (input: unknown): Result<T, ParseError[]> => {
-    const parseResult = schema.safeParse(input);
+    const validationResult = validator(input);
 
-    if (parseResult.success) {
-      return ok(parseResult.data);
+    if (validationResult.success) {
+      return ok(validationResult.data);
     }
 
-    const errors: ParseError[] = parseResult.error.issues.map(issue => ({
-      path: issue.path.map(p => String(p)),
-      message: issue.message
+    const errors: ParseError[] = validationResult.errors.map(error => ({
+      path: error.path.split('.').filter(p => p !== '$input'),
+      message: error.expected
     }));
 
     return err(errors);

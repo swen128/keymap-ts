@@ -1,330 +1,229 @@
-import {z} from 'zod/v4';
+import {tags} from 'typia';
 
-export const PlainKeyCodeSchema = z.string();
-export type PlainKeyCode = z.infer<typeof PlainKeyCodeSchema>;
+export type PlainKeyCode = string;
 
 // Common enums used across multiple schemas
-export const MouseButtonTypeSchema = z.enum(['MB1', 'MB2', 'MB3', 'MB4', 'MB5', 'LCLK', 'RCLK', 'MCLK']);
-export type MouseButtonType = z.infer<typeof MouseButtonTypeSchema>;
+export type MouseButtonType = 'MB1' | 'MB2' | 'MB3' | 'MB4' | 'MB5' | 'LCLK' | 'RCLK' | 'MCLK';
 
-export const BluetoothActionTypeSchema = z.enum(['BT_SEL', 'BT_CLR', 'BT_NXT', 'BT_PRV', 'BT_DISC', 'BT_CLR_ALL']);
-export type BluetoothActionType = z.infer<typeof BluetoothActionTypeSchema>;
+export type BluetoothActionType = 'BT_SEL' | 'BT_CLR' | 'BT_NXT' | 'BT_PRV' | 'BT_DISC' | 'BT_CLR_ALL';
 
-export const OutputTargetTypeSchema = z.enum(['OUT_USB', 'OUT_BLE', 'OUT_TOG']);
-export type OutputTargetType = z.infer<typeof OutputTargetTypeSchema>;
+export type OutputTargetType = 'OUT_USB' | 'OUT_BLE' | 'OUT_TOG';
 
-export const RgbActionTypeSchema = z.enum(['RGB_ON', 'RGB_OFF', 'RGB_TOG', 'RGB_HUI', 'RGB_HUD', 'RGB_SAI', 'RGB_SAD', 'RGB_BRI', 'RGB_BRD', 'RGB_SPI', 'RGB_SPD', 'RGB_EFF', 'RGB_EFR', 'RGB_COLOR_HSB', 'RGB_STATUS']);
-export type RgbActionType = z.infer<typeof RgbActionTypeSchema>;
+export type RgbActionType = 'RGB_ON' | 'RGB_OFF' | 'RGB_TOG' | 'RGB_HUI' | 'RGB_HUD' | 'RGB_SAI' | 'RGB_SAD' | 'RGB_BRI' | 'RGB_BRD' | 'RGB_SPI' | 'RGB_SPD' | 'RGB_EFF' | 'RGB_EFR' | 'RGB_COLOR_HSB' | 'RGB_STATUS';
 
-export const BacklightActionTypeSchema = z.enum(['BL_ON', 'BL_OFF', 'BL_TOG', 'BL_INC', 'BL_DEC', 'BL_CYCLE', 'BL_SET']);
-export type BacklightActionType = z.infer<typeof BacklightActionTypeSchema>;
+export type BacklightActionType = 'BL_ON' | 'BL_OFF' | 'BL_TOG' | 'BL_INC' | 'BL_DEC' | 'BL_CYCLE' | 'BL_SET';
 
-export const ExtPowerActionTypeSchema = z.enum(['EP_ON', 'EP_OFF', 'EP_TOG']);
-export type ExtPowerActionType = z.infer<typeof ExtPowerActionTypeSchema>;
+export type ExtPowerActionType = 'EP_ON' | 'EP_OFF' | 'EP_TOG';
 
-export const ModifierKeySchema = z.enum(['LS', 'LC', 'LA', 'LG', 'RS', 'RC', 'RA', 'RG']);
-export type ModifierKey = z.infer<typeof ModifierKeySchema>;
+export type ModifierKey = 'LS' | 'LC' | 'LA' | 'LG' | 'RS' | 'RC' | 'RA' | 'RG';
 
-export const KeyWithModifiersSchema = z.object({
-  modifiers: z.array(ModifierKeySchema),
-  key: PlainKeyCodeSchema,
-});
-export type KeyWithModifiers = z.infer<typeof KeyWithModifiersSchema>;
+export interface KeyWithModifiers {
+  modifiers: ModifierKey[];
+  key: PlainKeyCode;
+}
 
-export const KeyPressSchema = z.object({
-  behavior: z.literal('keyPress'),
-  code: KeyWithModifiersSchema,
-});
-export type KeyPress = z.infer<typeof KeyPressSchema>;
+export interface KeyPress {
+  behavior: 'keyPress';
+  code: KeyWithModifiers;
+}
 
-export const ModTapSchema = z.object({
-  behavior: z.literal('modTap'),
-  mod: KeyWithModifiersSchema,
-  tap: KeyWithModifiersSchema,
-});
-export type ModTap = z.infer<typeof ModTapSchema>;
+export interface ModTap {
+  behavior: 'modTap';
+  mod: KeyWithModifiers;
+  tap: KeyWithModifiers;
+}
 
-export const LayerTapSchema = z.object({
-  behavior: z.literal('layerTap'),
-  layer: z.string(),
-  tap: KeyWithModifiersSchema,
-});
-export type LayerTap = z.infer<typeof LayerTapSchema>;
+export interface LayerTap {
+  behavior: 'layerTap';
+  layer: string;
+  tap: KeyWithModifiers;
+}
 
-export const ToLayerSchema = z.object({
-  behavior: z.literal('toLayer'),
-  layer: z.string(),
-});
-export type ToLayer = z.infer<typeof ToLayerSchema>;
+export interface ToLayer {
+  behavior: 'toLayer';
+  layer: string;
+}
 
-export const TransparentSchema = z.object({
-  behavior: z.literal('transparent'),
-});
-export type Transparent = z.infer<typeof TransparentSchema>;
+export interface Transparent {
+  behavior: 'transparent';
+}
 
-export const NoneSchema = z.object({
-  behavior: z.literal('none'),
-});
-export type None = z.infer<typeof NoneSchema>;
+export interface None {
+  behavior: 'none';
+}
 
-export const KeyToggleSchema = z.object({
-  behavior: z.literal('keyToggle'),
-  code: KeyWithModifiersSchema,
-});
-export type KeyToggle = z.infer<typeof KeyToggleSchema>;
+export interface KeyToggle {
+  behavior: 'keyToggle';
+  code: KeyWithModifiers;
+}
 
 // Custom behavior definition schemas
-export const StickyKeyDefinitionSchema = z.object({
-  compatible: z.literal('zmk,behavior-sticky-key'),
-  name: z.string(),
-  releaseAfterMs: z.number().optional(),
-  quickRelease: z.boolean().optional(),
-  lazy: z.boolean().optional(),
-  ignoreModifiers: z.boolean().optional(),
-});
-export type StickyKeyDefinition = z.infer<typeof StickyKeyDefinitionSchema>;
+export interface StickyKeyDefinition {
+  compatible: 'zmk,behavior-sticky-key';
+  name: string;
+  releaseAfterMs?: number;
+  quickRelease?: boolean;
+  lazy?: boolean;
+  ignoreModifiers?: boolean;
+}
 
-export const StickyLayerDefinitionSchema = z.object({
-  compatible: z.literal('zmk,behavior-sticky-layer'),
-  name: z.string(),
-  releaseAfterMs: z.number().optional(),
-  quickRelease: z.boolean().optional(),
-  ignoreModifiers: z.boolean().optional(),
-});
-export type StickyLayerDefinition = z.infer<typeof StickyLayerDefinitionSchema>;
+export interface StickyLayerDefinition {
+  compatible: 'zmk,behavior-sticky-layer';
+  name: string;
+  releaseAfterMs?: number;
+  quickRelease?: boolean;
+  ignoreModifiers?: boolean;
+}
 
-export const HoldTapDefinitionSchema = z.object({
-  compatible: z.literal('zmk,behavior-hold-tap'),
-  name: z.string(),
-  tappingTermMs: z.number().optional(),
-  quickTapMs: z.number().optional(),
-  retro: z.boolean().optional(),
-  holdWhileUndecided: z.boolean().optional(),
-  flavor: z.enum(['hold-preferred', 'balanced', 'tap-preferred', 'tap-unless-interrupted']).optional(),
-  requirePriorIdleMs: z.number().optional(),
-  holdTriggerKeyPositions: z.array(z.number()).optional(),
-});
-export type HoldTapDefinition = z.infer<typeof HoldTapDefinitionSchema>;
+export interface HoldTapDefinition {
+  compatible: 'zmk,behavior-hold-tap';
+  name: string;
+  tappingTermMs?: number;
+  quickTapMs?: number;
+  retro?: boolean;
+  holdWhileUndecided?: boolean;
+  flavor?: 'hold-preferred' | 'balanced' | 'tap-preferred' | 'tap-unless-interrupted';
+  requirePriorIdleMs?: number;
+  holdTriggerKeyPositions?: number[];
+}
 
-export const TapDanceDefinitionSchema = z.object({
-  compatible: z.literal('zmk,behavior-tap-dance'),
-  name: z.string(),
-  tappingTermMs: z.number().optional(),
-});
-export type TapDanceDefinition = z.infer<typeof TapDanceDefinitionSchema>;
+export interface TapDanceDefinition {
+  compatible: 'zmk,behavior-tap-dance';
+  name: string;
+  tappingTermMs?: number;
+}
 
-export const ModMorphDefinitionSchema = z.object({
-  compatible: z.literal('zmk,behavior-mod-morph'),
-  name: z.string(),
-  keepMods: z.boolean().optional(),
-});
-export type ModMorphDefinition = z.infer<typeof ModMorphDefinitionSchema>;
+export interface ModMorphDefinition {
+  compatible: 'zmk,behavior-mod-morph';
+  name: string;
+  keepMods?: boolean;
+}
 
-export const StickyKeySchema = z.object({
-  behavior: z.literal('stickyKey'),
-  code: KeyWithModifiersSchema,
-});
-export type StickyKey = z.infer<typeof StickyKeySchema>;
+export interface StickyKey {
+  behavior: 'stickyKey';
+  code: KeyWithModifiers;
+}
 
-export const CustomStickyKeySchema = z.object({
-  behavior: z.literal('customStickyKey'),
-  definition: StickyKeyDefinitionSchema,
-  code: KeyWithModifiersSchema,
-});
-export type CustomStickyKey = z.infer<typeof CustomStickyKeySchema>;
+export interface CustomStickyKey {
+  behavior: 'customStickyKey';
+  definition: StickyKeyDefinition;
+  code: KeyWithModifiers;
+}
 
-export const CapsWordSchema = z.object({
-  behavior: z.literal('capsWord'),
-  continueList: z.array(KeyWithModifiersSchema).optional(),
-  applyToNumbers: z.boolean().optional(),
-});
-export type CapsWord = z.infer<typeof CapsWordSchema>;
+export interface CapsWord {
+  behavior: 'capsWord';
+  continueList?: KeyWithModifiers[];
+  applyToNumbers?: boolean;
+}
 
-export const KeyRepeatSchema = z.object({
-  behavior: z.literal('keyRepeat'),
-});
-export type KeyRepeat = z.infer<typeof KeyRepeatSchema>;
+export interface KeyRepeat {
+  behavior: 'keyRepeat';
+}
 
-export const MomentaryLayerSchema = z.object({
-  behavior: z.literal('momentaryLayer'),
-  layer: z.string(),
-});
-export type MomentaryLayer = z.infer<typeof MomentaryLayerSchema>;
+export interface MomentaryLayer {
+  behavior: 'momentaryLayer';
+  layer: string;
+}
 
-export const ToggleLayerSchema = z.object({
-  behavior: z.literal('toggleLayer'),
-  layer: z.string(),
-});
-export type ToggleLayer = z.infer<typeof ToggleLayerSchema>;
+export interface ToggleLayer {
+  behavior: 'toggleLayer';
+  layer: string;
+}
 
-export const StickyLayerSchema = z.object({
-  behavior: z.literal('stickyLayer'),
-  layer: z.string(),
-});
-export type StickyLayer = z.infer<typeof StickyLayerSchema>;
+export interface StickyLayer {
+  behavior: 'stickyLayer';
+  layer: string;
+}
 
-export const CustomStickyLayerSchema = z.object({
-  behavior: z.literal('customStickyLayer'),
-  definition: StickyLayerDefinitionSchema,
-  layer: z.string(),
-});
-export type CustomStickyLayer = z.infer<typeof CustomStickyLayerSchema>;
+export interface CustomStickyLayer {
+  behavior: 'customStickyLayer';
+  definition: StickyLayerDefinition;
+  layer: string;
+}
 
-export const MouseButtonSchema = z.object({
-  behavior: z.literal('mouseButton'),
-  button: MouseButtonTypeSchema,
-});
-export type MouseButton = z.infer<typeof MouseButtonSchema>;
+export interface MouseButton {
+  behavior: 'mouseButton';
+  button: MouseButtonType;
+}
 
-export const MouseMoveSchema = z.object({
-  behavior: z.literal('mouseMove'),
-  x: z.number().optional(),
-  y: z.number().optional(),
-  delay: z.number().optional(),
-  acceleration: z.number().optional(),
-});
-export type MouseMove = z.infer<typeof MouseMoveSchema>;
+export interface MouseMove {
+  behavior: 'mouseMove';
+  x?: number;
+  y?: number;
+  delay?: number;
+  acceleration?: number;
+}
 
-export const MouseScrollSchema = z.object({
-  behavior: z.literal('mouseScroll'),
-  x: z.number().optional(),
-  y: z.number().optional(),
-  continuousScroll: z.boolean().optional(),
-  delay: z.number().optional(),
-  acceleration: z.number().optional(),
-});
-export type MouseScroll = z.infer<typeof MouseScrollSchema>;
+export interface MouseScroll {
+  behavior: 'mouseScroll';
+  x?: number;
+  y?: number;
+  continuousScroll?: boolean;
+  delay?: number;
+  acceleration?: number;
+}
 
-export const SystemResetSchema = z.object({
-  behavior: z.literal('systemReset'),
-});
-export type SystemReset = z.infer<typeof SystemResetSchema>;
+export interface SystemReset {
+  behavior: 'systemReset';
+}
 
-export const BootloaderSchema = z.object({
-  behavior: z.literal('bootloader'),
-});
-export type Bootloader = z.infer<typeof BootloaderSchema>;
+export interface Bootloader {
+  behavior: 'bootloader';
+}
 
-export const BluetoothActionSchema = z.object({
-  behavior: z.literal('bluetooth'),
-  action: BluetoothActionTypeSchema,
-  profile: z.number().optional(),
-});
-export type BluetoothAction = z.infer<typeof BluetoothActionSchema>;
+export interface BluetoothAction {
+  behavior: 'bluetooth';
+  action: BluetoothActionType;
+  profile?: number;
+}
 
-export const OutputSelectionSchema = z.object({
-  behavior: z.literal('output'),
-  target: OutputTargetTypeSchema,
-});
-export type OutputSelection = z.infer<typeof OutputSelectionSchema>;
+export interface OutputSelection {
+  behavior: 'output';
+  target: OutputTargetType;
+}
 
-export const RgbUnderglowSchema = z.object({
-  behavior: z.literal('rgbUnderglow'),
-  action: RgbActionTypeSchema,
-  hue: z.number().optional(),
-  saturation: z.number().optional(),
-  brightness: z.number().optional(),
-});
-export type RgbUnderglow = z.infer<typeof RgbUnderglowSchema>;
+export interface RgbUnderglow {
+  behavior: 'rgbUnderglow';
+  action: RgbActionType;
+  hue?: number;
+  saturation?: number;
+  brightness?: number;
+}
 
-export const BacklightSchema = z.object({
-  behavior: z.literal('backlight'),
-  action: BacklightActionTypeSchema,
-  brightness: z.number().optional(),
-});
-export type Backlight = z.infer<typeof BacklightSchema>;
+export interface Backlight {
+  behavior: 'backlight';
+  action: BacklightActionType;
+  brightness?: number;
+}
 
-export const ExtPowerSchema = z.object({
-  behavior: z.literal('extPower'),
-  action: ExtPowerActionTypeSchema,
-});
-export type ExtPower = z.infer<typeof ExtPowerSchema>;
+export interface ExtPower {
+  behavior: 'extPower';
+  action: ExtPowerActionType;
+}
 
-export const SoftOffSchema = z.object({
-  behavior: z.literal('softOff'),
-  holdTimeMs: z.number().optional(),
-});
-export type SoftOff = z.infer<typeof SoftOffSchema>;
+export interface SoftOff {
+  behavior: 'softOff';
+  holdTimeMs?: number;
+}
 
-export const StudioUnlockSchema = z.object({
-  behavior: z.literal('studioUnlock'),
-});
-export type StudioUnlock = z.infer<typeof StudioUnlockSchema>;
+export interface StudioUnlock {
+  behavior: 'studioUnlock';
+}
 
-export type Binding =
-  | KeyPress | ModTap | LayerTap | ToLayer | MacroBinding | Transparent | None
-  | KeyToggle | StickyKey | CustomStickyKey | CapsWord | KeyRepeat
-  | MomentaryLayer | ToggleLayer | StickyLayer | CustomStickyLayer
-  | MouseButton | MouseMove | MouseScroll | SystemReset | Bootloader
-  | BluetoothAction | OutputSelection | RgbUnderglow | Backlight
-  | ExtPower | SoftOff | StudioUnlock | HoldTap | TapDance | ModMorph;
-
-export const BindingSchema: z.ZodType<Binding> = z.lazy(() => z.discriminatedUnion('behavior', [
-  KeyPressSchema,
-  ModTapSchema,
-  LayerTapSchema,
-  ToLayerSchema,
-  MacroBindingSchema,
-  TransparentSchema,
-  NoneSchema,
-  KeyToggleSchema,
-  StickyKeySchema,
-  CustomStickyKeySchema,
-  CapsWordSchema,
-  KeyRepeatSchema,
-  MomentaryLayerSchema,
-  ToggleLayerSchema,
-  StickyLayerSchema,
-  CustomStickyLayerSchema,
-  MouseButtonSchema,
-  MouseMoveSchema,
-  MouseScrollSchema,
-  SystemResetSchema,
-  BootloaderSchema,
-  BluetoothActionSchema,
-  OutputSelectionSchema,
-  RgbUnderglowSchema,
-  BacklightSchema,
-  ExtPowerSchema,
-  SoftOffSchema,
-  StudioUnlockSchema,
-  HoldTapSchema,
-  TapDanceSchema,
-  ModMorphSchema,
-]));
-
-export const HoldTapSchema = z.object({
-  behavior: z.literal('holdTap'),
-  definition: HoldTapDefinitionSchema,
-  tapBinding: BindingSchema,
-  holdBinding: BindingSchema,
-});
-export type HoldTap = {
+export interface HoldTap {
   behavior: 'holdTap';
   definition: HoldTapDefinition;
   tapBinding: Binding;
   holdBinding: Binding;
 }
 
-export const TapDanceSchema = z.object({
-  behavior: z.literal('tapDance'),
-  definition: TapDanceDefinitionSchema,
-  bindings: z.array(BindingSchema),
-});
-export type TapDance = {
+export interface TapDance {
   behavior: 'tapDance';
   definition: TapDanceDefinition;
   bindings: Binding[];
 }
 
-export const ModMorphSchema = z.object({
-  behavior: z.literal('modMorph'),
-  definition: ModMorphDefinitionSchema,
-  defaultBinding: BindingSchema,
-  morphedBinding: BindingSchema,
-  mods: z.array(PlainKeyCodeSchema),
-});
-export type ModMorph = {
+export interface ModMorph {
   behavior: 'modMorph';
   definition: ModMorphDefinition;
   defaultBinding: Binding;
@@ -332,46 +231,35 @@ export type ModMorph = {
   mods: PlainKeyCode[];
 }
 
-export const MacroTapActionSchema = z.object({
-  type: z.literal('tap'),
-  code: KeyWithModifiersSchema,
-});
-export type MacroTapAction = z.infer<typeof MacroTapActionSchema>;
+export interface MacroTapAction {
+  type: 'tap';
+  code: KeyWithModifiers;
+}
 
-export const MacroPressActionSchema = z.object({
-  type: z.literal('press'),
-  code: KeyWithModifiersSchema,
-});
-export type MacroPressAction = z.infer<typeof MacroPressActionSchema>;
+export interface MacroPressAction {
+  type: 'press';
+  code: KeyWithModifiers;
+}
 
-export const MacroReleaseActionSchema = z.object({
-  type: z.literal('release'),
-  code: KeyWithModifiersSchema,
-});
-export type MacroReleaseAction = z.infer<typeof MacroReleaseActionSchema>;
+export interface MacroReleaseAction {
+  type: 'release';
+  code: KeyWithModifiers;
+}
 
-export const MacroWaitActionSchema = z.object({
-  type: z.literal('wait'),
-  ms: z.number(),
-});
-export type MacroWaitAction = z.infer<typeof MacroWaitActionSchema>;
+export interface MacroWaitAction {
+  type: 'wait';
+  ms: number;
+}
 
-export const MacroControlActionSchema = z.discriminatedUnion('type', [
-  z.object({type: z.literal('pauseForRelease')}),
-  z.object({type: z.literal('tapTime'), ms: z.number()}),
-  z.object({type: z.literal('waitTime'), ms: z.number()}),
-]);
-export type MacroControlAction = z.infer<typeof MacroControlActionSchema>;
+export type MacroControlAction = 
+  | {type: 'pauseForRelease'}
+  | {type: 'tapTime'; ms: number}
+  | {type: 'waitTime'; ms: number};
 
-export type MacroBehaviorAction = {
+export interface MacroBehaviorAction {
   type: 'behavior';
   binding: Binding;
-};
-
-export const MacroBehaviorActionSchema: z.ZodType<MacroBehaviorAction> = z.object({
-  type: z.literal('behavior'),
-  binding: z.lazy(() => BindingSchema),
-});
+}
 
 export type MacroAction = 
   | MacroTapAction 
@@ -381,80 +269,56 @@ export type MacroAction =
   | MacroControlAction
   | MacroBehaviorAction;
 
-export const MacroActionSchema: z.ZodType<MacroAction> = z.lazy(() => z.union([
-  MacroTapActionSchema,
-  MacroPressActionSchema,
-  MacroReleaseActionSchema,
-  MacroWaitActionSchema,
-  MacroBehaviorActionSchema,
-  ...MacroControlActionSchema.options,
-]));
+export interface MacroDefinition {
+  name: string;
+  label?: string;
+  bindings: MacroAction[];
+  waitMs?: number;
+  tapMs?: number;
+}
 
-export const MacroDefinitionSchema = z.object({
-  name: z.string(),
-  label: z.string().optional(),
-  bindings: z.array(z.lazy(() => MacroActionSchema)),
-  waitMs: z.number().optional(),
-  tapMs: z.number().optional(),
-});
-export type MacroDefinition = z.infer<typeof MacroDefinitionSchema>;
+export interface MacroBinding {
+  behavior: 'macro';
+  macro: MacroDefinition;
+}
 
-export const MacroBindingSchema = z.object({
-  behavior: z.literal('macro'),
-  macro: MacroDefinitionSchema,
-});
-export type MacroBinding = z.infer<typeof MacroBindingSchema>;
+export type Binding =
+  | KeyPress | ModTap | LayerTap | ToLayer | MacroBinding | Transparent | None
+  | KeyToggle | StickyKey | CustomStickyKey | CapsWord | KeyRepeat
+  | MomentaryLayer | ToggleLayer | StickyLayer | CustomStickyLayer
+  | MouseButton | MouseMove | MouseScroll | SystemReset | Bootloader
+  | BluetoothAction | OutputSelection | RgbUnderglow | Backlight
+  | ExtPower | SoftOff | StudioUnlock | HoldTap | TapDance | ModMorph;
 
-export const ComboSchema = z.object({
-  name: z.string(),
-  timeout: z.number().optional(),
-  keyPositions: z.array(z.string()),
-  binding: BindingSchema,
-  layers: z.array(z.string()).optional(),
-  slowRelease: z.boolean().optional(),
-  requirePriorIdleMs: z.number().optional(),
-});
-export type Combo = z.infer<typeof ComboSchema>;
+export interface Combo {
+  name: string;
+  timeout?: number;
+  keyPositions: string[];
+  binding: Binding;
+  layers?: string[];
+  slowRelease?: boolean;
+  requirePriorIdleMs?: number;
+}
 
-export const ConditionalLayerSchema = z.object({
-  name: z.string(),
-  ifLayers: z.array(z.string()),
-  thenLayer: z.string(),
-});
-export type ConditionalLayer = z.infer<typeof ConditionalLayerSchema>;
+export interface ConditionalLayer {
+  name: string;
+  ifLayers: string[];
+  thenLayer: string;
+}
 
-export const KeyboardLayoutSchema = z.array(BindingSchema);
-export type GenericKeyboardLayout = z.infer<typeof KeyboardLayoutSchema>;
+export type GenericKeyboardLayout = Binding[];
 
-export const LayerSchema = z.object({
-  name: z.string(),
-  bindings: KeyboardLayoutSchema,
-});
-export type Layer = z.infer<typeof LayerSchema>;
+export interface Layer {
+  name: string;
+  bindings: GenericKeyboardLayout;
+}
 
 // Include validation
-const IncludeSchema = z.string()
-  .refine(
-    (val) => !val.includes('\n') && !val.includes('\r'),
-    { message: 'Include path must not contain line breaks' }
-  )
-  .refine(
-    (val) => !val.includes('"') && !val.includes("'") && !val.includes('`'),
-    { message: 'Include path must not contain quotes' }
-  )
-  .refine(
-    (val) => val.trim() !== '',
-    { message: 'Include path must not be empty' }
-  )
-  .refine(
-    (val) => val === val.trim(),
-    { message: 'Include path must not have leading or trailing whitespace' }
-  );
+export type Include = string & tags.Pattern<"^[^\\n\\r\"'`]+$"> & tags.MinLength<1>;
 
-export const KeymapSchema = z.object({
-  layers: z.array(LayerSchema),
-  combos: z.array(ComboSchema).optional(),
-  conditionalLayers: z.array(ConditionalLayerSchema).optional(),
-  includes: z.array(IncludeSchema).optional(),
-});
-export type Keymap = z.infer<typeof KeymapSchema>;
+export interface Keymap {
+  layers: Layer[];
+  combos?: Combo[];
+  conditionalLayers?: ConditionalLayer[];
+  includes?: Include[];
+}
