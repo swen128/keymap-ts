@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import {Result, ok, err, ResultAsync} from 'neverthrow';
-import {transpile} from './transpiler.js';
+import {err, ok, Result, ResultAsync} from 'neverthrow';
+import {transpile, type TranspileError} from './transpiler.js';
 import {writeFileSync} from 'fs';
 import {resolve} from 'path';
 import {pathToFileURL} from 'url';
@@ -16,7 +16,7 @@ Usage:
   kts <command> [options]
 
 Commands:
-  build <input-file> [output-file]   Transpile a keymap file to ZMK devicetree format
+  build <input-file> <output-file>   Transpile a keymap file to ZMK devicetree format
 
 Options:
   -h, --help   Show this help message
@@ -30,7 +30,7 @@ The keymap file should export a default object with the keymap configuration.
 `);
 }
 
-type BuildCommand = { command: 'build'; inputFile: string; outputFile?: string };
+type BuildCommand = { command: 'build'; inputFile: string; outputFile: string };
 type HelpCommand = { command: 'help' };
 type ParsedArgs = BuildCommand | HelpCommand;
 
@@ -46,78 +46,52 @@ function parseArgs(args: string[]): Result<ParsedArgs, string> {
   const command = args[0];
 
   if (command === 'build') {
-    const inputFile = args[1];
+    const [, inputFile, outputFile] = args;
     if (inputFile === undefined) {
       return err('Input file is required for build command');
     }
-    return ok({
-      command: 'build',
-      inputFile,
-      outputFile: args[2]
-    });
+    if (outputFile === undefined) {
+      return err('Output file is required for build command');
+    }
+    return ok({command: 'build', inputFile, outputFile});
   }
 
   return err(`Unknown command '${command}'\nRun with --help for usage information`);
 }
 
 const ModuleSchema = z.object({
-  default: z.unknown()
+  default: z.unknown(),
 });
 
-function loadDefaultExport(filePath: string): ResultAsync<unknown, string> {
-  const absolutePath = resolve(filePath);
-  const fileUrl = pathToFileURL(absolutePath).href;
+const importFile = (filePath: string): ResultAsync<unknown, string> =>
+  ResultAsync.fromPromise(
+    import((pathToFileURL(resolve(filePath)).href)),
+    (error) => `Failed to import file: ${error instanceof Error ? error.message : `${error}`}`
+  )
 
-  return ResultAsync.fromPromise(
-    import(fileUrl),
-    (error) => `Failed to load file: ${error instanceof Error ? error.message : 'Unknown error'}`
-  ).map((module: unknown) => {
-    // Try to parse as ES module with default export
-    const moduleResult = safeParse(ModuleSchema)(module);
-    if (moduleResult.isOk()) {
-      return moduleResult.value.default;
-    }
-    // Otherwise return the module itself (could be CommonJS or direct export)
-    return module;
-  });
-}
+const loadDefaultExport = (mod: unknown): Result<unknown, string> =>
+  safeParse(ModuleSchema)(mod)
+    .map(data => data.default)
+    .mapErr(() => "The module does not have the default export.")
 
-function formatError(error: { path?: string[]; message: string }): string {
-  const path = error.path ? error.path.join('.') : '';
+const formatError = (error: TranspileError): string => {
+  const path = error.path !== undefined ? error.path.join('.') : '';
   return `  ${path ? `[${path}] ` : ''}${error.message}`;
 }
 
-function writeOutput(content: string, outputFile?: string): Result<void, string> {
-  if (outputFile !== undefined) {
-    try {
-      writeFileSync(outputFile, content, 'utf-8');
-      console.log(`Successfully wrote output to ${outputFile}`);
-      return ok(undefined);
-    } catch (error) {
-      return err(`Failed to write file: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  } else {
-    console.log(content);
-    return ok(undefined);
-  }
-}
+const transpile_ = (keymap: unknown): Result<string, string> =>
+  transpile(keymap).mapErr(errors => errors.map(formatError).join('\n\n'));
 
-async function executeBuild(command: BuildCommand): Promise<Result<void, string>> {
-  const loadResult = await loadDefaultExport(command.inputFile);
-  
-  if (loadResult.isErr()) {
-    return err(loadResult.error);
+const build = async ({inputFile, outputFile}: { inputFile: string, outputFile: string }): Promise<void> => {
+  const result = await importFile(inputFile)
+    .andThen(loadDefaultExport)
+    .andThen(transpile_)
+
+  if (result.isOk()) {
+    writeFileSync(outputFile, result.value)
+  } else {
+    console.error(result.error)
   }
-  
-  const transpileResult = transpile(loadResult.value);
-  
-  if (transpileResult.isErr()) {
-    console.error('Transpilation failed:');
-    transpileResult.error.forEach(error => console.error(formatError(error)));
-    return err('Transpilation failed');
-  }
-  
-  return writeOutput(transpileResult.value, command.outputFile);
 }
 
 async function main(): Promise<void> {
@@ -125,29 +99,18 @@ async function main(): Promise<void> {
   const parseResult = parseArgs(args);
 
   if (parseResult.isErr()) {
-    console.error(`Error: ${parseResult.error}`);
-    throw new Error('Invalid command');
+    console.error(`Invalid command arguments: ${parseResult.error}`);
+    return;
   }
 
   const command = parseResult.value;
 
   switch (command.command) {
     case 'help':
-      showHelp();
-      return;
-
-    case 'build': {
-      const result = await executeBuild(command);
-      if (result.isErr()) {
-        console.error(result.error);
-        throw new Error(result.error);
-      }
-      break;
-    }
+      return showHelp();
+    case 'build':
+      return build(command);
   }
 }
 
-main().catch(() => {
-  // Error already logged, just exit with error code
-  process.exit(1);
-});
+void main();
