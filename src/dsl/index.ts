@@ -16,3 +16,6 @@ export { type KC } from './keycodes.js';
 
 // Re-export helper functions
 export * from './helpers.js';
+
+// Re-export key constants
+export * from './keys.js';

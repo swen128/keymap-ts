@@ -203,6 +203,16 @@ export const CSG = (k: string): Binding => kp(k, ['LC', 'LS', 'LG']);
 export const CAG = (k: string): Binding => kp(k, ['LC', 'LA', 'LG']);
 export const CSAG = (k: string): Binding => kp(k, ['LC', 'LS', 'LA', 'LG']);
 
+// Mouse button constants
+export const MB1: MouseButtonType = 'MB1';
+export const MB2: MouseButtonType = 'MB2';
+export const MB3: MouseButtonType = 'MB3';
+export const MB4: MouseButtonType = 'MB4';
+export const MB5: MouseButtonType = 'MB5';
+export const LCLK: MouseButtonType = 'LCLK';
+export const RCLK: MouseButtonType = 'RCLK';
+export const MCLK: MouseButtonType = 'MCLK';
+
 // Macro action helpers
 export const tap = (k: string, modifiers: Mod[] = []): MacroDefinition['bindings'][number] => ({
   type: 'tap',
