@@ -49,6 +49,9 @@ import type {
 // Type alias for cleaner code
 export type Mod = ModifierKey;
 
+// Re-export KeyPress for external use
+export type { KeyPress };
+
 // Basic key behaviors
 export const kp = (key: string, modifiers: Mod[] = []): KeyPress => ({
   behavior: 'keyPress',
@@ -220,19 +223,6 @@ export const key = (k: string, mods: Mod[] = []): { key: string; modifiers: Mod[
   key: k, 
   modifiers: mods 
 });
-
-// Common modifier combinations
-export const C = (k: string): KeyPress => kp(k, ['LC']);
-export const S = (k: string): KeyPress => kp(k, ['LS']);
-export const A = (k: string): KeyPress => kp(k, ['LA']);
-export const G = (k: string): KeyPress => kp(k, ['LG']);
-export const CS = (k: string): KeyPress => kp(k, ['LC', 'LS']);
-export const CA = (k: string): KeyPress => kp(k, ['LC', 'LA']);
-export const CG = (k: string): KeyPress => kp(k, ['LC', 'LG']);
-export const CSA = (k: string): KeyPress => kp(k, ['LC', 'LS', 'LA']);
-export const CSG = (k: string): KeyPress => kp(k, ['LC', 'LS', 'LG']);
-export const CAG = (k: string): KeyPress => kp(k, ['LC', 'LA', 'LG']);
-export const CSAG = (k: string): KeyPress => kp(k, ['LC', 'LS', 'LA', 'LG']);
 
 // Mouse button constants
 export const MB1: MouseButtonType = 'MB1';

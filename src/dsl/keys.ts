@@ -1,11 +1,13 @@
-import { kp } from './helpers.js';
+import { kp, type KeyPress, type Mod } from './helpers.js';
 
 // Letter keys
-// Note: A, C, G, S are already exported as modifier helpers in helpers.ts
+export const A = kp('A');
 export const B = kp('B');
+export const C = kp('C');
 export const D = kp('D');
 export const E = kp('E');
 export const F = kp('F');
+export const G = kp('G');
 export const H = kp('H');
 export const I = kp('I');
 export const J = kp('J');
@@ -17,6 +19,7 @@ export const O = kp('O');
 export const P = kp('P');
 export const Q = kp('Q');
 export const R = kp('R');
+export const S = kp('S');
 export const T = kp('T');
 export const U = kp('U');
 export const V = kp('V');
@@ -116,3 +119,21 @@ export const C_MEDIA_HOME = kp('C_MEDIA_HOME');
 export const C_VOL_UP = kp('C_VOL_UP');
 export const C_VOL_DN = kp('C_VOL_DN');
 export const C_MUTE = kp('C_MUTE');
+
+// Helper function to add a modifier
+const modify = (input: string | KeyPress, modifier: Mod): KeyPress => {
+  if (typeof input === 'string') {
+    return kp(input, [modifier]);
+  }
+  return kp(input.code.key, [...input.code.modifiers, modifier]);
+};
+
+// Modifier helpers
+export const LC = (input: string | KeyPress): KeyPress => modify(input, 'LC');
+export const LS = (input: string | KeyPress): KeyPress => modify(input, 'LS');
+export const LA = (input: string | KeyPress): KeyPress => modify(input, 'LA');
+export const LG = (input: string | KeyPress): KeyPress => modify(input, 'LG');
+export const RC = (input: string | KeyPress): KeyPress => modify(input, 'RC');
+export const RS = (input: string | KeyPress): KeyPress => modify(input, 'RS');
+export const RA = (input: string | KeyPress): KeyPress => modify(input, 'RA');
+export const RG = (input: string | KeyPress): KeyPress => modify(input, 'RG');
