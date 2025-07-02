@@ -58,14 +58,14 @@ export const kp = (key: string, modifiers: Mod[] = []): KeyPress => ({
   code: { key, modifiers }
 });
 
-export const sk = (key: string, modifiers: Mod[] = []): StickyKey => ({
+export const sk = (input: KeyPress): StickyKey => ({
   behavior: 'stickyKey',
-  code: { key, modifiers }
+  code: input.code
 });
 
-export const kt = (key: string, modifiers: Mod[] = []): KeyToggle => ({
+export const kt = (input: KeyPress): KeyToggle => ({
   behavior: 'keyToggle',
-  code: { key, modifiers }
+  code: input.code
 });
 
 // Layer behaviors
@@ -89,17 +89,17 @@ export const sl = (layer: string): StickyLayer => ({
   layer
 });
 
-export const lt = (layer: string, key: string, modifiers: Mod[] = []): LayerTap => ({
+export const lt = (layer: string, tap: KeyPress): LayerTap => ({
   behavior: 'layerTap',
   layer,
-  tap: { key, modifiers }
+  tap: tap.code
 });
 
 // Mod-tap
-export const mt = (modKey: string, modMods: Mod[], tapKey: string, tapMods: Mod[] = []): ModTap => ({
+export const mt = (mod: KeyPress, tap: KeyPress): ModTap => ({
   behavior: 'modTap',
-  mod: { key: modKey, modifiers: modMods },
-  tap: { key: tapKey, modifiers: tapMods }
+  mod: mod.code,
+  tap: tap.code
 });
 
 // Hold-tap
@@ -127,10 +127,10 @@ export const mm = (definition: ModMorphDefinition, defaultBinding: Behavior, mor
 });
 
 // Custom sticky key
-export const csk = (definition: StickyKeyDefinition, key: string, modifiers: Mod[] = []): CustomStickyKey => ({
+export const csk = (definition: StickyKeyDefinition, input: KeyPress): CustomStickyKey => ({
   behavior: 'customStickyKey',
   definition,
-  code: { key, modifiers }
+  code: input.code
 });
 
 // Custom sticky layer
@@ -235,19 +235,19 @@ export const RCLK: MouseButtonType = 'RCLK';
 export const MCLK: MouseButtonType = 'MCLK';
 
 // Macro action helpers
-export const tap = (k: string, modifiers: Mod[] = []): MacroDefinition['bindings'][number] => ({
+export const tap = (input: KeyPress): MacroDefinition['bindings'][number] => ({
   type: 'tap',
-  code: { key: k, modifiers }
+  code: input.code
 });
 
-export const press = (k: string, modifiers: Mod[] = []): MacroDefinition['bindings'][number] => ({
+export const press = (input: KeyPress): MacroDefinition['bindings'][number] => ({
   type: 'press',
-  code: { key: k, modifiers }
+  code: input.code
 });
 
-export const release = (k: string, modifiers: Mod[] = []): MacroDefinition['bindings'][number] => ({
+export const release = (input: KeyPress): MacroDefinition['bindings'][number] => ({
   type: 'release',
-  code: { key: k, modifiers }
+  code: input.code
 });
 
 export const wait = (ms: number): MacroDefinition['bindings'][number] => ({

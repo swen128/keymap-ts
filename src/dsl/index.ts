@@ -18,4 +18,4 @@ export { type KC } from './keycodes.js';
 export * from './helpers.js';
 
 // Re-export key constants
-export * from './keys.js';
+export * as keys from './keys.js';
