@@ -11,7 +11,7 @@
  */
 
 import type { 
-  Binding, 
+  Behavior, 
   Combo, 
   ConditionalLayer, 
   MacroAction,
@@ -206,7 +206,7 @@ export type CheckedMacroAction =
  */
 export interface BehaviorMacroAction {
   type: 'behavior';
-  binding: Binding;
+  binding: Behavior;
 }
 
 /**

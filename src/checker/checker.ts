@@ -1,7 +1,7 @@
 import { Result, ok, err } from 'neverthrow';
 import type {
   Keymap,
-  Binding,
+  Behavior,
   MacroDefinition,
   Layer,
   StickyKeyDefinition,
@@ -60,7 +60,7 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
   });
 
   // Validate layer references in a binding
-  function validateLayerReferences(binding: Binding, path: string[]): void {
+  function validateLayerReferences(binding: Behavior, path: string[]): void {
     switch (binding.behavior) {
       case 'momentaryLayer':
       case 'toggleLayer':
@@ -128,7 +128,7 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
   }
 
   // Collect behavior definitions from bindings
-  function collectBehaviorDefinitions(binding: Binding): void {
+  function collectBehaviorDefinitions(binding: Behavior): void {
     switch (binding.behavior) {
       case 'customStickyKey':
       case 'customStickyLayer': {
@@ -167,7 +167,7 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
         } else {
           collectedBehaviorDefs.set(binding.definition.name, binding.definition);
         }
-        binding.bindings.forEach((b: Binding) => collectBehaviorDefinitions(b));
+        binding.bindings.forEach((b: Behavior) => collectBehaviorDefinitions(b));
         break;
       }
       case 'modMorph': {
@@ -289,7 +289,7 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
     };
   }
 
-  function extractMacros(binding: Binding): void {
+  function extractMacros(binding: Behavior): void {
     switch (binding.behavior) {
       case 'macro':
         extractedMacros.push(binding.macro);
@@ -378,7 +378,7 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
           .find(binding => binding.behavior === 'holdTap' && binding.definition?.name === name);
 
         // If not found in layers, search in macros
-        const firstUsage = firstUsageFromLayers || ((): Binding | undefined => {
+        const firstUsage = firstUsageFromLayers || ((): Behavior | undefined => {
           for (const macro of deduplicatedMacros.values()) {
             for (const action of macro.bindings) {
               if (action.type === 'behavior' && action.binding.behavior === 'holdTap' &&
@@ -480,7 +480,7 @@ function getCheckedBindingBehaviorName(binding: SimpleBinding): string {
 }
 
 
-function bindingToMacroActions(binding: Binding): ExtendedMacroAction[] {
+function bindingToMacroActions(binding: Behavior): ExtendedMacroAction[] {
   const action: BehaviorMacroAction = {
     type: 'behavior',
     binding
@@ -509,7 +509,7 @@ function createSyntheticMacro(binding: CheckedBinding, behaviorName: string): Ch
 }
 
 function checkBinding(
-  binding: Binding,
+  binding: Behavior,
   synthesizedMacros: CheckedMacroDefinition[],
   errors: ValidationError[],
   path: string[],
@@ -590,7 +590,7 @@ function checkBinding(
 
       const usedBehaviors = behaviorUsageMap.get(binding.definition.name) || new Set();
 
-      binding.bindings.forEach((b: Binding) => {
+      binding.bindings.forEach((b: Behavior) => {
         const result = checkBindingForNesting(b, [...synthesizedMacros, ...newCheckedMacroDefinitions], behaviorUsageMap, layerNameToIndex);
         newCheckedMacroDefinitions.push(...result.synthesizedMacros);
         checkedBindings.push(result.binding);
@@ -646,7 +646,7 @@ function checkBinding(
 }
 
 function checkSimpleBinding(
-  binding: Binding,
+  binding: Behavior,
   layerNameToIndex: LayerNameToIndexMap
 ): SimpleBinding | null {
   switch (binding.behavior) {
@@ -775,7 +775,7 @@ function checkSimpleBinding(
 }
 
 function checkBindingForNesting(
-  binding: Binding,
+  binding: Behavior,
   existingMacros: CheckedMacroDefinition[],
   behaviorUsageMap: BehaviorUsageMap,
   layerNameToIndex: LayerNameToIndexMap
@@ -859,7 +859,7 @@ function checkBindingForNesting(
 }
 
 function findExistingSyntheticMacro(
-  binding: Binding,
+  binding: Behavior,
   existingMacros: CheckedMacroDefinition[]
 ): CheckedMacroDefinition | undefined {
   const actions = bindingToMacroActions(binding);

@@ -1,5 +1,5 @@
 import type { 
-  Binding, 
+  Behavior, 
   ModifierKey, 
   HoldTapDefinition, 
   TapDanceDefinition, 
@@ -19,57 +19,57 @@ import type {
 export type Mod = ModifierKey;
 
 // Basic key behaviors
-export const kp = (key: string, modifiers: Mod[] = []): Binding => ({
+export const kp = (key: string, modifiers: Mod[] = []): Behavior => ({
   behavior: 'keyPress',
   code: { key, modifiers }
 });
 
-export const sk = (key: string, modifiers: Mod[] = []): Binding => ({
+export const sk = (key: string, modifiers: Mod[] = []): Behavior => ({
   behavior: 'stickyKey',
   code: { key, modifiers }
 });
 
-export const kt = (key: string, modifiers: Mod[] = []): Binding => ({
+export const kt = (key: string, modifiers: Mod[] = []): Behavior => ({
   behavior: 'keyToggle',
   code: { key, modifiers }
 });
 
 // Layer behaviors
-export const mo = (layer: string): Binding => ({
+export const mo = (layer: string): Behavior => ({
   behavior: 'momentaryLayer',
   layer
 });
 
-export const to = (layer: string): Binding => ({
+export const to = (layer: string): Behavior => ({
   behavior: 'toLayer',
   layer
 });
 
-export const tog = (layer: string): Binding => ({
+export const tog = (layer: string): Behavior => ({
   behavior: 'toggleLayer',
   layer
 });
 
-export const sl = (layer: string): Binding => ({
+export const sl = (layer: string): Behavior => ({
   behavior: 'stickyLayer',
   layer
 });
 
-export const lt = (layer: string, key: string, modifiers: Mod[] = []): Binding => ({
+export const lt = (layer: string, key: string, modifiers: Mod[] = []): Behavior => ({
   behavior: 'layerTap',
   layer,
   tap: { key, modifiers }
 });
 
 // Mod-tap
-export const mt = (modKey: string, modMods: Mod[], tapKey: string, tapMods: Mod[] = []): Binding => ({
+export const mt = (modKey: string, modMods: Mod[], tapKey: string, tapMods: Mod[] = []): Behavior => ({
   behavior: 'modTap',
   mod: { key: modKey, modifiers: modMods },
   tap: { key: tapKey, modifiers: tapMods }
 });
 
 // Hold-tap
-export const ht = (definition: HoldTapDefinition, hold: Binding, tap: Binding): Binding => ({
+export const ht = (definition: HoldTapDefinition, hold: Behavior, tap: Behavior): Behavior => ({
   behavior: 'holdTap',
   definition,
   holdBinding: hold,
@@ -77,14 +77,14 @@ export const ht = (definition: HoldTapDefinition, hold: Binding, tap: Binding): 
 });
 
 // Tap-dance
-export const td = (definition: TapDanceDefinition, ...bindings: Binding[]): Binding => ({
+export const td = (definition: TapDanceDefinition, ...bindings: Behavior[]): Behavior => ({
   behavior: 'tapDance',
   definition,
   bindings
 });
 
 // Mod-morph
-export const mm = (definition: ModMorphDefinition, defaultBinding: Binding, morphedBinding: Binding, mods: Mod[]): Binding => ({
+export const mm = (definition: ModMorphDefinition, defaultBinding: Behavior, morphedBinding: Behavior, mods: Mod[]): Behavior => ({
   behavior: 'modMorph',
   definition,
   defaultBinding,
@@ -93,33 +93,33 @@ export const mm = (definition: ModMorphDefinition, defaultBinding: Binding, morp
 });
 
 // Custom sticky key
-export const csk = (definition: StickyKeyDefinition, key: string, modifiers: Mod[] = []): Binding => ({
+export const csk = (definition: StickyKeyDefinition, key: string, modifiers: Mod[] = []): Behavior => ({
   behavior: 'customStickyKey',
   definition,
   code: { key, modifiers }
 });
 
 // Custom sticky layer
-export const csl = (definition: StickyLayerDefinition, layer: string): Binding => ({
+export const csl = (definition: StickyLayerDefinition, layer: string): Behavior => ({
   behavior: 'customStickyLayer',
   definition,
   layer
 });
 
 // Macro
-export const macro = (name: string, bindings: MacroDefinition['bindings']): Binding => ({
+export const macro = (name: string, bindings: MacroDefinition['bindings']): Behavior => ({
   behavior: 'macro',
   macro: { name, bindings }
 });
 
 // System behaviors
-export const bt = (action: BluetoothActionType, profile?: number): Binding => ({
+export const bt = (action: BluetoothActionType, profile?: number): Behavior => ({
   behavior: 'bluetooth',
   action,
   ...(profile !== undefined && { profile })
 });
 
-export const out = (target: OutputTargetType): Binding => ({
+export const out = (target: OutputTargetType): Behavior => ({
   behavior: 'output',
   target
 });
@@ -129,7 +129,7 @@ export const rgb_ug = (
   hue?: number,
   saturation?: number,
   brightness?: number
-): Binding => ({
+): Behavior => ({
   behavior: 'rgbUnderglow',
   action,
   ...(hue !== undefined && { hue }),
@@ -140,49 +140,49 @@ export const rgb_ug = (
 export const bl = (
   action: BacklightActionType,
   brightness?: number
-): Binding => ({
+): Behavior => ({
   behavior: 'backlight',
   action,
   ...(brightness !== undefined && { brightness })
 });
 
-export const ext_power = (action: ExtPowerActionType): Binding => ({
+export const ext_power = (action: ExtPowerActionType): Behavior => ({
   behavior: 'extPower',
   action
 });
 
 // Mouse behaviors
-export const mkp = (button: MouseButtonType): Binding => ({
+export const mkp = (button: MouseButtonType): Behavior => ({
   behavior: 'mouseButton',
   button
 });
 
-export const mmv = (x?: number, y?: number): Binding => ({
+export const mmv = (x?: number, y?: number): Behavior => ({
   behavior: 'mouseMove',
   ...(x !== undefined && { x }),
   ...(y !== undefined && { y })
 });
 
-export const msc = (x?: number, y?: number): Binding => ({
+export const msc = (x?: number, y?: number): Behavior => ({
   behavior: 'mouseScroll',
   ...(x !== undefined && { x }),
   ...(y !== undefined && { y })
 });
 
 // Soft off
-export const soft_off = (holdTimeMs?: number): Binding => ({
+export const soft_off = (holdTimeMs?: number): Behavior => ({
   behavior: 'softOff',
   ...(holdTimeMs !== undefined && { holdTimeMs })
 });
 
 // Special behaviors - constants
-export const trans: Binding = { behavior: 'transparent' };
-export const none: Binding = { behavior: 'none' };
-export const bootloader: Binding = { behavior: 'bootloader' };
-export const sys_reset: Binding = { behavior: 'systemReset' };
-export const caps_word: Binding = { behavior: 'capsWord' };
-export const key_repeat: Binding = { behavior: 'keyRepeat' };
-export const studio_unlock: Binding = { behavior: 'studioUnlock' };
+export const trans: Behavior = { behavior: 'transparent' };
+export const none: Behavior = { behavior: 'none' };
+export const bootloader: Behavior = { behavior: 'bootloader' };
+export const sys_reset: Behavior = { behavior: 'systemReset' };
+export const caps_word: Behavior = { behavior: 'capsWord' };
+export const key_repeat: Behavior = { behavior: 'keyRepeat' };
+export const studio_unlock: Behavior = { behavior: 'studioUnlock' };
 
 // Helper to create key codes
 export const key = (k: string, mods: Mod[] = []): { key: string; modifiers: Mod[] } => ({ 
@@ -191,17 +191,17 @@ export const key = (k: string, mods: Mod[] = []): { key: string; modifiers: Mod[
 });
 
 // Common modifier combinations
-export const C = (k: string): Binding => kp(k, ['LC']);
-export const S = (k: string): Binding => kp(k, ['LS']);
-export const A = (k: string): Binding => kp(k, ['LA']);
-export const G = (k: string): Binding => kp(k, ['LG']);
-export const CS = (k: string): Binding => kp(k, ['LC', 'LS']);
-export const CA = (k: string): Binding => kp(k, ['LC', 'LA']);
-export const CG = (k: string): Binding => kp(k, ['LC', 'LG']);
-export const CSA = (k: string): Binding => kp(k, ['LC', 'LS', 'LA']);
-export const CSG = (k: string): Binding => kp(k, ['LC', 'LS', 'LG']);
-export const CAG = (k: string): Binding => kp(k, ['LC', 'LA', 'LG']);
-export const CSAG = (k: string): Binding => kp(k, ['LC', 'LS', 'LA', 'LG']);
+export const C = (k: string): Behavior => kp(k, ['LC']);
+export const S = (k: string): Behavior => kp(k, ['LS']);
+export const A = (k: string): Behavior => kp(k, ['LA']);
+export const G = (k: string): Behavior => kp(k, ['LG']);
+export const CS = (k: string): Behavior => kp(k, ['LC', 'LS']);
+export const CA = (k: string): Behavior => kp(k, ['LC', 'LA']);
+export const CG = (k: string): Behavior => kp(k, ['LC', 'LG']);
+export const CSA = (k: string): Behavior => kp(k, ['LC', 'LS', 'LA']);
+export const CSG = (k: string): Behavior => kp(k, ['LC', 'LS', 'LG']);
+export const CAG = (k: string): Behavior => kp(k, ['LC', 'LA', 'LG']);
+export const CSAG = (k: string): Behavior => kp(k, ['LC', 'LS', 'LA', 'LG']);
 
 // Mouse button constants
 export const MB1: MouseButtonType = 'MB1';
@@ -248,7 +248,7 @@ export const waitTime = (ms: number): MacroDefinition['bindings'][number] => ({
   ms
 });
 
-export const behavior = (binding: Binding): MacroDefinition['bindings'][number] => ({
+export const behavior = (binding: Behavior): MacroDefinition['bindings'][number] => ({
   type: 'behavior',
   binding
 });

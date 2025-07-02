@@ -1,4 +1,4 @@
-import type {Binding as B, GenericKeyboardLayout, Keymap} from '../schemas.js';
+import type {Behavior as B, GenericKeyboardLayout, Keymap} from '../schemas.js';
 
 type HalfLayout = {
   finger: [

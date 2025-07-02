@@ -6,7 +6,7 @@ import type {
   CheckedMacroDefinition,
   CheckedMacroAction
 } from '../checker/types.js';
-import type {Binding, Combo, ConditionalLayer, KeyWithModifiers} from '../dsl/schemas.js';
+import type {Behavior, Combo, ConditionalLayer, KeyWithModifiers} from '../dsl/schemas.js';
 
 /**
  * Emits ZMK devicetree format from a checked keymap
@@ -209,7 +209,7 @@ function emitLayer(layer: CheckedLayer, indent: string = '    '): string {
 }
 
 // Helper to convert a Binding to the format expected by emitBehaviorReference
-function emitBindingReference(behaviorBinding: Binding): string {
+function emitBindingReference(behaviorBinding: Behavior): string {
   // For macro actions, we need to handle the original binding format
   // The checker has already validated these, so we can safely emit them
   switch (behaviorBinding.behavior) {

@@ -213,21 +213,21 @@ export interface StudioUnlock {
 export interface HoldTap {
   behavior: 'holdTap';
   definition: HoldTapDefinition;
-  tapBinding: Binding;
-  holdBinding: Binding;
+  tapBinding: Behavior;
+  holdBinding: Behavior;
 }
 
 export interface TapDance {
   behavior: 'tapDance';
   definition: TapDanceDefinition;
-  bindings: Binding[];
+  bindings: Behavior[];
 }
 
 export interface ModMorph {
   behavior: 'modMorph';
   definition: ModMorphDefinition;
-  defaultBinding: Binding;
-  morphedBinding: Binding;
+  defaultBinding: Behavior;
+  morphedBinding: Behavior;
   mods: PlainKeyCode[];
 }
 
@@ -258,7 +258,7 @@ export type MacroControlAction =
 
 export interface MacroBehaviorAction {
   type: 'behavior';
-  binding: Binding;
+  binding: Behavior;
 }
 
 export type MacroAction = 
@@ -282,7 +282,7 @@ export interface MacroBinding {
   macro: MacroDefinition;
 }
 
-export type Binding =
+export type Behavior =
   | KeyPress | ModTap | LayerTap | ToLayer | MacroBinding | Transparent | None
   | KeyToggle | StickyKey | CustomStickyKey | CapsWord | KeyRepeat
   | MomentaryLayer | ToggleLayer | StickyLayer | CustomStickyLayer
@@ -294,7 +294,7 @@ export interface Combo {
   name: string;
   timeout?: number;
   keyPositions: string[];
-  binding: Binding;
+  binding: Behavior;
   layers?: string[];
   slowRelease?: boolean;
   requirePriorIdleMs?: number;
@@ -306,7 +306,7 @@ export interface ConditionalLayer {
   thenLayer: string;
 }
 
-export type GenericKeyboardLayout = Binding[];
+export type GenericKeyboardLayout = Behavior[];
 
 export interface Layer {
   name: string;
