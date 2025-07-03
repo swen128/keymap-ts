@@ -849,6 +849,68 @@ describe('emitter', () => {
     expect(output).toBe(expected);
   });
 
+  it('should emit hold-tap with holdTriggerOnRelease property', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          {
+            behavior: 'holdTap',
+            name: 'hmr',
+            holdBinding: { behavior: 'keyPress', code: { key: 'LSHFT', modifiers: [] } },
+            tapBinding: { behavior: 'keyPress', code: { key: 'F', modifiers: [] } }
+          }
+        ]
+      }],
+      macros: [],
+      behaviors: [{
+        compatible: 'zmk,behavior-hold-tap',
+        name: 'hmr',
+        tappingTermMs: 280,
+        quickTapMs: 175,
+        flavor: 'balanced',
+        requirePriorIdleMs: 150,
+        holdTriggerKeyPositions: [10, 11, 12, 13, 14, 15],
+        holdTriggerOnRelease: true,
+        bindings: ['kp', 'kp']
+      } satisfies CheckedHoldTapDefinition],
+      combos: [],
+      conditionalLayers: []
+    };
+    
+    const expected = `/ {
+  behaviors {
+    hmr: hmr {
+        compatible = "zmk,behavior-hold-tap";
+        label = "HMR";
+        #binding-cells = <2>;
+        bindings = <&kp>, <&kp>;
+        tapping-term-ms = <280>;
+        quick-tap-ms = <175>;
+        flavor = "balanced";
+        require-prior-idle-ms = <150>;
+        hold-trigger-key-positions = <10 11 12 13 14 15>;
+        hold-trigger-on-release;
+    };
+
+  };
+
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+            &hmr LSHFT F
+        >;
+    };
+
+  };
+};`;
+    
+    const output = emit(keymap);
+    expect(output).toBe(expected);
+  });
+
   it('should emit mod-morph behavior with behavior parameters as 0', () => {
     const keymap: CheckedKeymap = {
       layers: [{

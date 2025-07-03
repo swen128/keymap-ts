@@ -85,6 +85,7 @@ export interface HoldTapDefinition {
   flavor?: 'hold-preferred' | 'balanced' | 'tap-preferred' | 'tap-unless-interrupted';
   requirePriorIdleMs?: number;
   holdTriggerKeyPositions?: number[];
+  holdTriggerOnRelease?: boolean;
 }
 
 export interface TapDanceDefinition {

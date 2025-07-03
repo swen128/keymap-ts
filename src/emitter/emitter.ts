@@ -399,6 +399,9 @@ function emitBehaviorDefinition(def: BehaviorDefinition, indent: string = '    '
         const positions = def.holdTriggerKeyPositions.join(' ');
         lines.push(`${indent}    hold-trigger-key-positions = <${positions}>;`);
       }
+      if (def.holdTriggerOnRelease !== undefined && def.holdTriggerOnRelease) {
+        lines.push(`${indent}    hold-trigger-on-release;`);
+      }
       break;
     }
     
