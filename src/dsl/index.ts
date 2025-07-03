@@ -19,3 +19,6 @@ export * from './helpers.js';
 
 // Re-export key constants
 export * as keys from './keys.js';
+
+// Re-export macro helpers
+export * from './macro.js';

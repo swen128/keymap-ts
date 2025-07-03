@@ -3,7 +3,6 @@ import type {
   ModifierKey,
   HoldTapDefinition,
   TapDanceDefinition,
-  MacroDefinition,
   StickyKeyDefinition,
   StickyLayerDefinition,
   ModMorphDefinition,
@@ -27,7 +26,6 @@ import type {
   ModMorph,
   CustomStickyKey,
   CustomStickyLayer,
-  MacroBinding,
   BluetoothAction,
   OutputSelection,
   RgbUnderglow,
@@ -140,11 +138,6 @@ export const csl = (definition: StickyLayerDefinition, layer: string): CustomSti
   layer
 });
 
-// Macro
-export const macro = (name: string, bindings: MacroDefinition['bindings']): MacroBinding => ({
-  behavior: 'macro',
-  macro: { name, bindings }
-});
 
 // System behaviors
 export const bt = (action: BluetoothActionType, profile?: number): BluetoothAction => ({
@@ -234,42 +227,3 @@ export const LCLK: MouseButtonType = 'LCLK';
 export const RCLK: MouseButtonType = 'RCLK';
 export const MCLK: MouseButtonType = 'MCLK';
 
-// Macro action helpers
-export const tap = (input: KeyPress): MacroDefinition['bindings'][number] => ({
-  type: 'tap',
-  code: input.code
-});
-
-export const press = (input: KeyPress): MacroDefinition['bindings'][number] => ({
-  type: 'press',
-  code: input.code
-});
-
-export const release = (input: KeyPress): MacroDefinition['bindings'][number] => ({
-  type: 'release',
-  code: input.code
-});
-
-export const wait = (ms: number): MacroDefinition['bindings'][number] => ({
-  type: 'wait',
-  ms
-});
-
-export const pauseForRelease = (): MacroDefinition['bindings'][number] => ({
-  type: 'pauseForRelease'
-});
-
-export const tapTime = (ms: number): MacroDefinition['bindings'][number] => ({
-  type: 'tapTime',
-  ms
-});
-
-export const waitTime = (ms: number): MacroDefinition['bindings'][number] => ({
-  type: 'waitTime',
-  ms
-});
-
-export const behavior = (binding: Behavior): MacroDefinition['bindings'][number] => ({
-  type: 'behavior',
-  binding
-});
