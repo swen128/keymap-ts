@@ -508,6 +508,204 @@ function emitConditionalLayer(condLayer: ConditionalLayer, index: number, indent
   return lines.join('\n');
 }
 
+function emitGlobalBehaviorConfig(config: import('../dsl/schemas.js').GlobalBehaviorConfig): string[] {
+  const lines: string[] = [];
+  
+  // Hold-tap behaviors (&mt, &lt)
+  if (config.mt) {
+    lines.push('&mt {');
+    if (config.mt.tappingTermMs !== undefined) {
+      lines.push(`    tapping-term-ms = <${config.mt.tappingTermMs}>;`);
+    }
+    if (config.mt.flavor !== undefined) {
+      lines.push(`    flavor = "${config.mt.flavor}";`);
+    }
+    if (config.mt.quickTapMs !== undefined) {
+      lines.push(`    quick-tap-ms = <${config.mt.quickTapMs}>;`);
+    }
+    if (config.mt.requirePriorIdleMs !== undefined) {
+      lines.push(`    require-prior-idle-ms = <${config.mt.requirePriorIdleMs}>;`);
+    }
+    if (config.mt.holdTriggerKeyPositions !== undefined && config.mt.holdTriggerKeyPositions.length > 0) {
+      lines.push(`    hold-trigger-key-positions = <${config.mt.holdTriggerKeyPositions.join(' ')}>;`);
+    }
+    if (config.mt.holdTriggerOnRelease !== undefined && config.mt.holdTriggerOnRelease) {
+      lines.push('    hold-trigger-on-release;');
+    }
+    if (config.mt.holdWhileUndecided !== undefined && config.mt.holdWhileUndecided) {
+      lines.push('    hold-while-undecided;');
+    }
+    if (config.mt.holdWhileUndecidedLinger !== undefined && config.mt.holdWhileUndecidedLinger) {
+      lines.push('    hold-while-undecided-linger;');
+    }
+    if (config.mt.retro !== undefined && config.mt.retro) {
+      lines.push('    retro-tap;');
+    }
+    lines.push('};');
+    lines.push('');
+  }
+  
+  if (config.lt) {
+    lines.push('&lt {');
+    if (config.lt.tappingTermMs !== undefined) {
+      lines.push(`    tapping-term-ms = <${config.lt.tappingTermMs}>;`);
+    }
+    if (config.lt.flavor !== undefined) {
+      lines.push(`    flavor = "${config.lt.flavor}";`);
+    }
+    if (config.lt.quickTapMs !== undefined) {
+      lines.push(`    quick-tap-ms = <${config.lt.quickTapMs}>;`);
+    }
+    if (config.lt.requirePriorIdleMs !== undefined) {
+      lines.push(`    require-prior-idle-ms = <${config.lt.requirePriorIdleMs}>;`);
+    }
+    if (config.lt.holdTriggerKeyPositions !== undefined && config.lt.holdTriggerKeyPositions.length > 0) {
+      lines.push(`    hold-trigger-key-positions = <${config.lt.holdTriggerKeyPositions.join(' ')}>;`);
+    }
+    if (config.lt.holdTriggerOnRelease !== undefined && config.lt.holdTriggerOnRelease) {
+      lines.push('    hold-trigger-on-release;');
+    }
+    if (config.lt.holdWhileUndecided !== undefined && config.lt.holdWhileUndecided) {
+      lines.push('    hold-while-undecided;');
+    }
+    if (config.lt.holdWhileUndecidedLinger !== undefined && config.lt.holdWhileUndecidedLinger) {
+      lines.push('    hold-while-undecided-linger;');
+    }
+    if (config.lt.retro !== undefined && config.lt.retro) {
+      lines.push('    retro-tap;');
+    }
+    lines.push('};');
+    lines.push('');
+  }
+  
+  // Sticky key behavior (&sk)
+  if (config.sk) {
+    lines.push('&sk {');
+    if (config.sk.releaseAfterMs !== undefined) {
+      lines.push(`    release-after-ms = <${config.sk.releaseAfterMs}>;`);
+    }
+    if (config.sk.quickRelease !== undefined && config.sk.quickRelease) {
+      lines.push('    quick-release;');
+    }
+    if (config.sk.lazy !== undefined && config.sk.lazy) {
+      lines.push('    lazy;');
+    }
+    if (config.sk.ignoreModifiers !== undefined && !config.sk.ignoreModifiers) {
+      lines.push('    /delete-property/ ignore-modifiers;');
+    }
+    lines.push('};');
+    lines.push('');
+  }
+  
+  // Sticky layer behavior (&sl)
+  if (config.sl) {
+    lines.push('&sl {');
+    if (config.sl.releaseAfterMs !== undefined) {
+      lines.push(`    release-after-ms = <${config.sl.releaseAfterMs}>;`);
+    }
+    if (config.sl.quickRelease !== undefined && config.sl.quickRelease) {
+      lines.push('    quick-release;');
+    }
+    if (config.sl.ignoreModifiers !== undefined && !config.sl.ignoreModifiers) {
+      lines.push('    /delete-property/ ignore-modifiers;');
+    }
+    lines.push('};');
+    lines.push('');
+  }
+  
+  // Caps word behavior (&caps_word)
+  if (config.capsWord) {
+    lines.push('&caps_word {');
+    if (config.capsWord.continueList !== undefined && config.capsWord.continueList.length > 0) {
+      const keys = config.capsWord.continueList.join(' ');
+      lines.push(`    continue-list = <${keys}>;`);
+    }
+    if (config.capsWord.mods !== undefined && config.capsWord.mods.length > 0) {
+      const modStr = config.capsWord.mods.map(m => {
+        // Convert our modifier names to ZMK's MOD_ format
+        switch(m) {
+          case 'LS': return 'MOD_LSFT';
+          case 'LC': return 'MOD_LCTL';
+          case 'LA': return 'MOD_LALT';
+          case 'LG': return 'MOD_LGUI';
+          case 'RS': return 'MOD_RSFT';
+          case 'RC': return 'MOD_RCTL';
+          case 'RA': return 'MOD_RALT';
+          case 'RG': return 'MOD_RGUI';
+          default: return m;
+        }
+      }).join(' | ');
+      lines.push(`    mods = <(${modStr})>;`);
+    }
+    lines.push('};');
+    lines.push('');
+  }
+  
+  // Key repeat behavior (&key_repeat)
+  if (config.keyRepeat) {
+    lines.push('&key_repeat {');
+    if (config.keyRepeat.usagePages !== undefined && config.keyRepeat.usagePages.length > 0) {
+      const pages = config.keyRepeat.usagePages.join(' ');
+      lines.push(`    usage-pages = <${pages}>;`);
+    }
+    lines.push('};');
+    lines.push('');
+  }
+  
+  // Soft off behavior (&soft_off)
+  if (config.softOff) {
+    lines.push('&soft_off {');
+    if (config.softOff.holdTimeMs !== undefined) {
+      lines.push(`    hold-time-ms = <${config.softOff.holdTimeMs}>;`);
+    }
+    if (config.softOff.splitPeripheralOffOnPress !== undefined && config.softOff.splitPeripheralOffOnPress) {
+      lines.push('    split-peripheral-off-on-press;');
+    }
+    lines.push('};');
+    lines.push('');
+  }
+  
+  // Mouse move behavior (&mmv)
+  if (config.mouseMove) {
+    lines.push('&mmv {');
+    if (config.mouseMove.xInputCode !== undefined) {
+      lines.push(`    x-input-code = <${config.mouseMove.xInputCode}>;`);
+    }
+    if (config.mouseMove.yInputCode !== undefined) {
+      lines.push(`    y-input-code = <${config.mouseMove.yInputCode}>;`);
+    }
+    if (config.mouseMove.timeToMaxSpeedMs !== undefined) {
+      lines.push(`    time-to-max-speed-ms = <${config.mouseMove.timeToMaxSpeedMs}>;`);
+    }
+    if (config.mouseMove.accelerationExponent !== undefined) {
+      lines.push(`    acceleration-exponent = <${config.mouseMove.accelerationExponent}>;`);
+    }
+    lines.push('};');
+    lines.push('');
+  }
+  
+  // Mouse scroll behavior (&msc)
+  if (config.mouseScroll) {
+    lines.push('&msc {');
+    if (config.mouseScroll.xInputCode !== undefined) {
+      lines.push(`    x-input-code = <${config.mouseScroll.xInputCode}>;`);
+    }
+    if (config.mouseScroll.yInputCode !== undefined) {
+      lines.push(`    y-input-code = <${config.mouseScroll.yInputCode}>;`);
+    }
+    if (config.mouseScroll.timeToMaxSpeedMs !== undefined) {
+      lines.push(`    time-to-max-speed-ms = <${config.mouseScroll.timeToMaxSpeedMs}>;`);
+    }
+    if (config.mouseScroll.accelerationExponent !== undefined) {
+      lines.push(`    acceleration-exponent = <${config.mouseScroll.accelerationExponent}>;`);
+    }
+    lines.push('};');
+    lines.push('');
+  }
+  
+  return lines;
+}
+
 export function emit(keymap: CheckedKeymap): string {
   const lines: string[] = [];
   
@@ -518,6 +716,12 @@ export function emit(keymap: CheckedKeymap): string {
       lines.push(`#include <${include}>`);
     });
     lines.push('');
+  }
+  
+  // Global behavior configuration - before the root / block
+  if (keymap.globalBehaviorConfig) {
+    const globalConfigLines = emitGlobalBehaviorConfig(keymap.globalBehaviorConfig);
+    lines.push(...globalConfigLines);
   }
   
   lines.push('/ {');

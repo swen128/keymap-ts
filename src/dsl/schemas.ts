@@ -317,9 +317,85 @@ export interface Layer {
 // Include validation
 export type Include = string & tags.Pattern<"^[^\\n\\r\"'`]+$"> & tags.MinLength<1>;
 
+export interface GlobalBehaviorConfig {
+  // Hold-tap behaviors (&mt, &lt)
+  mt?: {
+    tappingTermMs?: number;
+    flavor?: 'hold-preferred' | 'balanced' | 'tap-preferred' | 'tap-unless-interrupted';
+    quickTapMs?: number;
+    requirePriorIdleMs?: number;
+    holdTriggerKeyPositions?: number[];
+    holdTriggerOnRelease?: boolean;
+    holdWhileUndecided?: boolean;
+    holdWhileUndecidedLinger?: boolean;
+    retro?: boolean;
+  };
+  
+  lt?: {
+    tappingTermMs?: number;
+    flavor?: 'hold-preferred' | 'balanced' | 'tap-preferred' | 'tap-unless-interrupted';
+    quickTapMs?: number;
+    requirePriorIdleMs?: number;
+    holdTriggerKeyPositions?: number[];
+    holdTriggerOnRelease?: boolean;
+    holdWhileUndecided?: boolean;
+    holdWhileUndecidedLinger?: boolean;
+    retro?: boolean;
+  };
+
+  // Sticky key behavior (&sk)
+  sk?: {
+    releaseAfterMs?: number;
+    quickRelease?: boolean;
+    lazy?: boolean;
+    ignoreModifiers?: boolean;
+  };
+
+  // Sticky layer behavior (&sl)
+  sl?: {
+    releaseAfterMs?: number;
+    quickRelease?: boolean;
+    ignoreModifiers?: boolean;
+  };
+
+  // Caps word behavior (&caps_word)
+  capsWord?: {
+    continueList?: string[];
+    mods?: ModifierKey[];
+  };
+
+  // Key repeat behavior (&key_repeat)
+  keyRepeat?: {
+    usagePages?: Array<'HID_USAGE_KEY' | 'HID_USAGE_CONSUMER'>;
+  };
+
+  // Soft off behavior (&soft_off)
+  softOff?: {
+    holdTimeMs?: number;
+    splitPeripheralOffOnPress?: boolean;
+  };
+
+  // Mouse move behavior (&mmv)
+  mouseMove?: {
+    xInputCode?: number;
+    yInputCode?: number;
+    timeToMaxSpeedMs?: number;
+    accelerationExponent?: number;
+  };
+
+  // Mouse scroll behavior (&msc)
+  mouseScroll?: {
+    xInputCode?: number;
+    yInputCode?: number;
+    timeToMaxSpeedMs?: number;
+    accelerationExponent?: number;
+  };
+}
+
 export interface Keymap {
   layers: Layer[];
   combos?: Combo[];
   conditionalLayers?: ConditionalLayer[];
   includes?: Include[];
+  globalBehaviorConfig?: GlobalBehaviorConfig;
 }

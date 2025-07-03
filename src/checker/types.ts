@@ -128,6 +128,7 @@ export interface CheckedKeymap {
   combos: Combo[];
   conditionalLayers: ConditionalLayer[];
   includes?: string[];
+  globalBehaviorConfig?: import('../dsl/schemas.js').GlobalBehaviorConfig;
 }
 
 /**

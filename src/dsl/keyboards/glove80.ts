@@ -57,6 +57,7 @@ export function glove80Keymap(config: {
   combos?: Keymap['combos'];
   conditionalLayers?: Keymap['conditionalLayers'];
   includes?: Keymap['includes'];
+  globalBehaviorConfig?: Keymap['globalBehaviorConfig'];
 }): Keymap {
   return {
     layers: config.layers.map(({name, layout}) => ({
@@ -65,6 +66,7 @@ export function glove80Keymap(config: {
     })),
     combos: config.combos,
     conditionalLayers: config.conditionalLayers,
-    includes: config.includes
+    includes: config.includes,
+    globalBehaviorConfig: config.globalBehaviorConfig
   };
 }

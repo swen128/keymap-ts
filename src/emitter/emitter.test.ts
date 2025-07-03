@@ -1039,4 +1039,252 @@ describe('emitter', () => {
     const output = emit(keymap);
     expect(output).toBe(expected);
   });
+
+  it('should emit global mt configuration', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      macros: [],
+      behaviors: [],
+      combos: [],
+      conditionalLayers: [],
+      globalBehaviorConfig: {
+        mt: {
+          tappingTermMs: 280,
+          flavor: 'balanced',
+          quickTapMs: 175,
+          requirePriorIdleMs: 150,
+          holdTriggerKeyPositions: [10, 11, 12, 13],
+          holdTriggerOnRelease: true,
+          holdWhileUndecided: true,
+          holdWhileUndecidedLinger: true,
+          retro: true
+        }
+      }
+    };
+    
+    const expected = `&mt {
+    tapping-term-ms = <280>;
+    flavor = "balanced";
+    quick-tap-ms = <175>;
+    require-prior-idle-ms = <150>;
+    hold-trigger-key-positions = <10 11 12 13>;
+    hold-trigger-on-release;
+    hold-while-undecided;
+    hold-while-undecided-linger;
+    retro-tap;
+};
+
+/ {
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+        >;
+    };
+
+  };
+};`;
+    
+    const result = emit(keymap);
+    expect(result).toBe(expected);
+  });
+
+  it('should emit global sk configuration with ignore-modifiers disabled', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      macros: [],
+      behaviors: [],
+      combos: [],
+      conditionalLayers: [],
+      globalBehaviorConfig: {
+        sk: {
+          releaseAfterMs: 2000,
+          quickRelease: true,
+          lazy: true,
+          ignoreModifiers: false
+        }
+      }
+    };
+    
+    const expected = `&sk {
+    release-after-ms = <2000>;
+    quick-release;
+    lazy;
+    /delete-property/ ignore-modifiers;
+};
+
+/ {
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+        >;
+    };
+
+  };
+};`;
+    
+    const result = emit(keymap);
+    expect(result).toBe(expected);
+  });
+
+  it('should emit global caps_word configuration', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      macros: [],
+      behaviors: [],
+      combos: [],
+      conditionalLayers: [],
+      globalBehaviorConfig: {
+        capsWord: {
+          continueList: [
+            'UNDERSCORE',
+            'MINUS',
+            'BSPC',
+            'DEL'
+          ],
+          mods: ['LS', 'LA']
+        }
+      }
+    };
+    
+    const expected = `&caps_word {
+    continue-list = <UNDERSCORE MINUS BSPC DEL>;
+    mods = <(MOD_LSFT | MOD_LALT)>;
+};
+
+/ {
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+        >;
+    };
+
+  };
+};`;
+    
+    const result = emit(keymap);
+    expect(result).toBe(expected);
+  });
+
+  it('should emit multiple global behavior configurations', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      macros: [],
+      behaviors: [],
+      combos: [],
+      conditionalLayers: [],
+      globalBehaviorConfig: {
+        mt: {
+          tappingTermMs: 200
+        },
+        lt: {
+          flavor: 'tap-preferred',
+          quickTapMs: 150
+        },
+        sk: {
+          releaseAfterMs: 1500
+        }
+      }
+    };
+    
+    const expected = `&mt {
+    tapping-term-ms = <200>;
+};
+
+&lt {
+    flavor = "tap-preferred";
+    quick-tap-ms = <150>;
+};
+
+&sk {
+    release-after-ms = <1500>;
+};
+
+/ {
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+        >;
+    };
+
+  };
+};`;
+    
+    const result = emit(keymap);
+    expect(result).toBe(expected);
+  });
+
+  it('should emit global mouse and other behavior configurations', () => {
+    const keymap: CheckedKeymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      macros: [],
+      behaviors: [],
+      combos: [],
+      conditionalLayers: [],
+      globalBehaviorConfig: {
+        keyRepeat: {
+          usagePages: ['HID_USAGE_KEY', 'HID_USAGE_CONSUMER']
+        },
+        softOff: {
+          holdTimeMs: 5000,
+          splitPeripheralOffOnPress: true
+        },
+        mouseMove: {
+          timeToMaxSpeedMs: 500,
+          accelerationExponent: 2
+        }
+      }
+    };
+    
+    const expected = `&key_repeat {
+    usage-pages = <HID_USAGE_KEY HID_USAGE_CONSUMER>;
+};
+
+&soft_off {
+    hold-time-ms = <5000>;
+    split-peripheral-off-on-press;
+};
+
+&mmv {
+    time-to-max-speed-ms = <500>;
+    acceleration-exponent = <2>;
+};
+
+/ {
+  keymap {
+    compatible = "zmk,keymap";
+
+    default_layer {
+        bindings = <
+        >;
+    };
+
+  };
+};`;
+    
+    const result = emit(keymap);
+    expect(result).toBe(expected);
+  });
 });

@@ -429,7 +429,8 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
     behaviors: behaviorDefinitions,
     combos: keymap.combos ?? [],
     conditionalLayers: keymap.conditionalLayers ?? [],
-    includes: keymap.includes
+    includes: keymap.includes,
+    globalBehaviorConfig: keymap.globalBehaviorConfig
   });
 }
 

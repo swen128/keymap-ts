@@ -602,6 +602,41 @@ describe('checker', () => {
     }
   });
 
+  it('should pass through global behavior config', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      globalBehaviorConfig: {
+        mt: {
+          tappingTermMs: 280,
+          flavor: 'balanced'
+        },
+        sk: {
+          releaseAfterMs: 2000,
+          ignoreModifiers: false
+        }
+      }
+    };
+
+    const result = check(keymap);
+    
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.globalBehaviorConfig).toEqual({
+        mt: {
+          tappingTermMs: 280,
+          flavor: 'balanced'
+        },
+        sk: {
+          releaseAfterMs: 2000,
+          ignoreModifiers: false
+        }
+      });
+    }
+  });
+
   it('should collect unique bindings for behaviors used in multiple contexts', () => {
     const keymap: Keymap = {
       layers: [
