@@ -3,11 +3,13 @@
   "entry": [
     "src/index.ts",
     "src/cli.ts",
-    "preload.ts"
+    "preload.ts",
+    "example/**/index.ts"
   ],
   "project": [
     "src/**/*.ts",
-    "preload.ts"
+    "preload.ts",
+    "example/**/*.ts"
   ],
   "ignore": [
     "**/*.test.ts",

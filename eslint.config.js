@@ -8,7 +8,7 @@ import eslintComments from 'eslint-plugin-eslint-comments';
 export default [
   js.configs.recommended,
   {
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.ts', 'example/**/*.ts'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -94,7 +94,7 @@ export default [
     },
   },
   {
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.ts', 'example/**/*.ts'],
     ignores: ['**/*.test.ts'],
     rules: {
       'functional/no-let': 'error',
@@ -111,6 +111,14 @@ export default [
     rules: {
       'no-console': 'off',
       'functional/no-throw-statements': 'off',
+    },
+  },
+  {
+    files: ['example/**/*.ts'],
+    rules: {
+      // Relax some strict rules for examples
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      'no-console': 'off',
     },
   },
   {

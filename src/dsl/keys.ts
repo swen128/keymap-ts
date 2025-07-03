@@ -137,3 +137,17 @@ export const RC = (input: string | KeyPress): KeyPress => modify(input, 'RC');
 export const RS = (input: string | KeyPress): KeyPress => modify(input, 'RS');
 export const RA = (input: string | KeyPress): KeyPress => modify(input, 'RA');
 export const RG = (input: string | KeyPress): KeyPress => modify(input, 'RG');
+
+// Additional symbols
+export const EXCL = kp('EXCL');
+export const AT = kp('AT');
+export const HASH = kp('HASH');
+export const DLLR = kp('DLLR');
+export const PRCNT = kp('PRCNT');
+export const CARET = kp('CARET');
+export const AMPS = kp('AMPS');
+export const STAR = kp('STAR');
+export const LPAR = kp('LPAR');
+export const RPAR = kp('RPAR');
+export const LBRC = kp('LBRC');
+export const RBRC = kp('RBRC');

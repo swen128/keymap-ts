@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "dev": "bun --hot ./index.ts",
-    "build": "tspc",
+    "build": "tspc --project tsconfig.build.json",
     "postbuild": "chmod +x dist/cli.js",
     "typecheck": "tspc --noEmit",
     "lint": "eslint .",

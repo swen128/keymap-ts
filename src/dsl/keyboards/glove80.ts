@@ -1,23 +1,27 @@
 import type {Behavior as B, GenericKeyboardLayout, Keymap} from '../schemas.js';
 
-type HalfLayout = {
-  finger: [
-    [B, B, B, B, B],
-    [B, B, B, B, B, B],
-    [B, B, B, B, B, B],
-    [B, B, B, B, B, B],
-    [B, B, B, B, B, B],
-    [B, B, B, B, B]
-  ];
-  thumb: [
-    [B, B, B],
-    [B, B, B]
-  ];
+export type Glove80FingerLayout = [
+  [B, B, B, B, B],
+  [B, B, B, B, B, B],
+  [B, B, B, B, B, B],
+  [B, B, B, B, B, B],
+  [B, B, B, B, B, B],
+  [B, B, B, B, B]
+];
+
+export type Glove80ThumbLayout = [
+  [B, B, B],
+  [B, B, B]
+]
+
+export type Glove80HalfLayout = {
+  finger: Glove80FingerLayout;
+  thumb: Glove80ThumbLayout;
 };
 
-type Glove80Layout = {
-  left: HalfLayout;
-  right: HalfLayout;
+export type Glove80Layout = {
+  left: Glove80HalfLayout;
+  right: Glove80HalfLayout;
 };
 
 export function glove80Layout(

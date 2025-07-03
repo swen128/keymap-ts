@@ -1,0 +1,9 @@
+{
+  // This config is used for building the package (only src directory)
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/*.test.ts", "**/*.test.tsx"]
+}

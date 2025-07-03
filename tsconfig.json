@@ -19,7 +19,6 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "rootDir": "./src",
 
     // Best practices
     "strict": true,
@@ -40,5 +39,5 @@
       }
     ]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "example/**/*"]
 }
