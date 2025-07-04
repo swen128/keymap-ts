@@ -1,10 +1,40 @@
 import type {Behavior, KeyPress, MacroAction, MacroBinding} from './schemas.js';
 
-// Example usage:
-//   macro('copy_all')
-//     .tap(LC(A))
-//     .tap(LC(C))
-//     .build()
+/**
+ * Creates a macro builder for defining keyboard macros.
+ * 
+ * Macros allow you to define a sequence of key presses, releases, and other actions
+ * that can be triggered by a single key press.
+ * 
+ * @param name - The name of the macro (must be unique within your keymap)
+ * @returns A MacroBuilder instance for chaining macro actions
+ * 
+ * @example
+ * ```typescript
+ * // Create a copy-all macro
+ * const copyAll = macro('copy_all')
+ *   .tap(LC(A))  // Ctrl+A (select all)
+ *   .tap(LC(C))  // Ctrl+C (copy)
+ *   .build();
+ * 
+ * // Create a macro with delays
+ * const delayedType = macro('delayed_type')
+ *   .tap(H)
+ *   .wait(100)   // Wait 100ms
+ *   .tap(I)
+ *   .build();
+ * 
+ * // Create a macro that holds a modifier
+ * const shiftWord = macro('shift_word')
+ *   .press(LSHFT)
+ *   .tap(W)
+ *   .tap(O)
+ *   .tap(R)
+ *   .tap(D)
+ *   .release(LSHFT)
+ *   .build();
+ * ```
+ */
 export const macro = (name: string): MacroBuilder => MacroBuilder.create(name);
 
 export class MacroBuilder {

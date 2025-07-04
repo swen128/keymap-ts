@@ -202,3 +202,6 @@ export const sys_reset: SystemReset = { behavior: 'systemReset' };
 export const caps_word: CapsWord = { behavior: 'capsWord' };
 export const key_repeat: KeyRepeat = { behavior: 'keyRepeat' };
 export const studio_unlock: StudioUnlock = { behavior: 'studioUnlock' };
+
+// Re-export macro builder
+export { macro } from './macro.js';
