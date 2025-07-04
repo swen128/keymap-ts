@@ -11,3 +11,5 @@ playground/
 # Turborepo
 .turbo
 
+*.tgz
+

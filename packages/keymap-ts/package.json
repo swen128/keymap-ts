@@ -1,7 +1,31 @@
 {
   "name": "keymap-ts",
-  "version": "0.0.1",
-  "description": "Ergonomic way to write ZMK keymap",
+  "version": "0.1.0-alpha.0",
+  "description": "TypeScript DSL for creating ZMK keyboard firmware keymaps with type safety and validation",
+  "license": "MIT",
+  "author": "PND",
+  "keywords": [
+    "zmk",
+    "keyboard",
+    "keymap",
+    "firmware",
+    "typescript",
+    "dsl",
+    "mechanical-keyboard",
+    "glove80",
+    "ergonomic",
+    "qmk"
+  ],
+  "homepage": "https://github.com/swen128/keymap-ts#readme",
+  "bugs": {
+    "url": "https://github.com/swen128/keymap-ts#issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swen128/keymap-ts.git",
+    "directory": "packages/keymap-ts"
+  },
+  "files": ["dist"],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,9 +43,6 @@
   "bin": {
     "kts": "./dist/cli.js"
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "dev": "bun --hot ./index.ts",
     "build": "tspc",
@@ -29,8 +50,9 @@
     "typecheck": "tspc --noEmit",
     "test": "bun test",
     "lint": "eslint .",
+    "check": "turbo run typecheck test lint",
     "prepare": "ts-patch install",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "turbo run build check"
   },
   "devDependencies": {
     "@ryoppippi/unplugin-typia": "^2.6.5",
