@@ -16,12 +16,12 @@ const createHoldMacro = (name: string, modifierKey: KeyPress, layerName: string)
     .build();
 
 const createTapMacro = (name: string, key: KeyPress) => {
-  const builder = macro(name);
-  
   const modifiers = [LSHFT, LCTRL, LALT, LGUI, RSHFT, RCTRL, RALT, RGUI];
-  for (const mod of modifiers) {
-    builder.release(mod);
-  }
+  
+  const builder = modifiers.reduce(
+    (acc, mod) => acc.release(mod),
+    macro(name)
+  );
   
   return builder.tap(key).build();
 };
