@@ -1,5 +1,6 @@
-import {mo, keys, type KeyPress, macro} from '../../src/index.js';
+import {behaviors, keys, type KeyPress, macro} from '../../src/index.js';
 
+const {mo} = behaviors;
 const { 
   LSHFT, LCTRL, LALT, LGUI, RSHFT, RCTRL, RALT, RGUI,
   A, S, D, F, J, K, L, SEMI

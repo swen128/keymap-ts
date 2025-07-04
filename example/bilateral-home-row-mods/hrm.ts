@@ -1,8 +1,9 @@
 import {
-  ht, trans, none, keys,
+  behaviors, keys,
   type KeyPress,
 } from '../../src/index.js';
 
+const {ht, trans, none} = behaviors;
 const {LCTRL, LALT, LGUI, LSHFT, RCTRL, RALT, RGUI, RSHFT} = keys;
 import type {
   Glove80Layout,

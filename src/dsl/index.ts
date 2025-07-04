@@ -14,8 +14,8 @@ export { glove80Layout, glove80Keymap } from './keyboards/glove80.js';
 // Re-export keycodes
 export { type KC } from './keycodes.js';
 
-// Re-export helper functions
-export * from './helpers.js';
+// Re-export behavior functions
+export * as behaviors from './behaviors.js';
 
 // Re-export key constants
 export * as keys from './keys.js';

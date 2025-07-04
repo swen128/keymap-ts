@@ -1,4 +1,4 @@
-import { kp } from './helpers.js';
+import { kp } from './behaviors.js';
 import type { ModifierKey, KeyPress } from './schemas.js';
 
 // Letter keys
