@@ -1,5 +1,5 @@
-import {glove80Keymap, keys, behaviors} from "../../src/index.js";
-import type {Glove80Layout} from "../../src/dsl/keyboards/glove80.js";
+import {behaviors, type Keymap, keys} from "../../src/index.js";
+import {glove80Layer, type Glove80Layout} from "../../src/glove80.js";
 import {bilateralHomeRowMods} from "./hrm.js";
 
 const {mo, trans, none} = behaviors;
@@ -52,21 +52,22 @@ const baseLayer: { name: string; layout: Glove80Layout } = {
   }
 };
 
-const keymap = glove80Keymap({
+const bhrmLayers = bilateralHomeRowMods(baseLayer, {
+  index: LGUI,
+  middle: LALT,
+  ring: LCTRL,
+  pinky: LSHFT
+}).map(glove80Layer);
+
+const keymap: Keymap = {
   includes: [
     'behaviors.dtsi',
     'dt-bindings/zmk/keys.h'
   ],
-
   layers: [
-    ...(bilateralHomeRowMods(baseLayer, {
-      index: LGUI,
-      middle: LALT,
-      ring: LCTRL,
-      pinky: LSHFT
-    })),
+    ...bhrmLayers,
 
-    {
+    glove80Layer({
       name: 'Sym',
       layout: {
         left: {
@@ -98,8 +99,8 @@ const keymap = glove80Keymap({
           ]
         }
       }
-    }
+    })
   ]
-});
+};
 
 export default keymap;

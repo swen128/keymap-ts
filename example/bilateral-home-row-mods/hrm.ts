@@ -2,13 +2,10 @@ import {
   behaviors, keys,
   type KeyPress,
 } from '../../src/index.js';
-
-const {ht, trans, none} = behaviors;
-const {LCTRL, LALT, LGUI, LSHFT, RCTRL, RALT, RGUI, RSHFT} = keys;
 import type {
   Glove80Layout,
   Glove80ThumbLayout
-} from "../../src/dsl/keyboards/glove80.js";
+} from "../../src/glove80.js";
 import {hmlIndex, hmlMiddle, hmlRing, hmlPinky, hmrIndex, hmrMiddle, hmrRing, hmrPinky} from "./hold-tap.js";
 import {
   hmlIndexRing, hmlIndexMiddle, hmlIndexPinky,
@@ -35,6 +32,8 @@ type Mods = {
   pinky: KeyPress,
 }
 
+const {ht, trans, none} = behaviors;
+const {LCTRL, LALT, LGUI, LSHFT, RCTRL, RALT, RGUI, RSHFT} = keys;
 
 const transThumb: Glove80ThumbLayout = [
   [trans, trans, trans],

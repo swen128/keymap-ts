@@ -1,4 +1,4 @@
-import type {Behavior as B, GenericKeyboardLayout, Keymap} from '../schemas.js';
+import type {Behavior as B, GenericKeyboardLayout, Layer} from '../schemas.js';
 
 export type Glove80FingerLayout = [
   [B, B, B, B, B],
@@ -24,7 +24,12 @@ export type Glove80Layout = {
   right: Glove80HalfLayout;
 };
 
-export function glove80Layout(
+export type Glove80Layer = {
+  name: string
+  layout: Glove80Layout
+}
+
+function glove80Layout(
   layout: Glove80Layout,
 ): GenericKeyboardLayout {
   const {left, right} = layout;
@@ -56,21 +61,9 @@ export function glove80Layout(
   ];
 }
 
-export function glove80Keymap(config: {
-  layers: ReadonlyArray<{ name: string; layout: Glove80Layout }>;
-  combos?: Keymap['combos'];
-  conditionalLayers?: Keymap['conditionalLayers'];
-  includes?: Keymap['includes'];
-  globalBehaviorConfig?: Keymap['globalBehaviorConfig'];
-}): Keymap {
+export function glove80Layer({name, layout}: Glove80Layer): Layer {
   return {
-    layers: config.layers.map(({name, layout}) => ({
-      name,
-      bindings: glove80Layout(layout)
-    })),
-    combos: config.combos,
-    conditionalLayers: config.conditionalLayers,
-    includes: config.includes,
-    globalBehaviorConfig: config.globalBehaviorConfig
+    name,
+    bindings: glove80Layout(layout)
   };
 }
