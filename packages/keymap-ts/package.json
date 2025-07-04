@@ -1,7 +1,7 @@
 {
   "name": "keymap-ts",
-  "version": "0.1.0",
-  "description": "TypeScript DSL for creating ZMK keyboard firmware keymaps",
+  "version": "0.0.1",
+  "description": "Ergonomic way to write ZMK keymap",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
