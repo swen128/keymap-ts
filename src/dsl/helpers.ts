@@ -44,14 +44,8 @@ import type {
   StudioUnlock
 } from './schemas.js';
 
-// Type alias for cleaner code
-export type Mod = ModifierKey;
-
-// Re-export KeyPress for external use
-export type { KeyPress };
-
 // Basic key behaviors
-export const kp = (key: string, modifiers: Mod[] = []): KeyPress => ({
+export const kp = (key: string, modifiers: ModifierKey[] = []): KeyPress => ({
   behavior: 'keyPress',
   code: { key, modifiers }
 });
@@ -116,7 +110,7 @@ export const td = (definition: TapDanceDefinition, ...bindings: Behavior[]): Tap
 });
 
 // Mod-morph
-export const mm = (definition: ModMorphDefinition, defaultBinding: Behavior, morphedBinding: Behavior, mods: Mod[]): ModMorph => ({
+export const mm = (definition: ModMorphDefinition, defaultBinding: Behavior, morphedBinding: Behavior, mods: ModifierKey[]): ModMorph => ({
   behavior: 'modMorph',
   definition,
   defaultBinding,
@@ -196,13 +190,11 @@ export const msc = (x?: number, y?: number): MouseScroll => ({
   ...(y !== undefined && { y })
 });
 
-// Soft off
 export const soft_off = (holdTimeMs?: number): SoftOff => ({
   behavior: 'softOff',
   ...(holdTimeMs !== undefined && { holdTimeMs })
 });
 
-// Special behaviors - constants
 export const trans: Transparent = { behavior: 'transparent' };
 export const none: None = { behavior: 'none' };
 export const bootloader: Bootloader = { behavior: 'bootloader' };
@@ -210,20 +202,3 @@ export const sys_reset: SystemReset = { behavior: 'systemReset' };
 export const caps_word: CapsWord = { behavior: 'capsWord' };
 export const key_repeat: KeyRepeat = { behavior: 'keyRepeat' };
 export const studio_unlock: StudioUnlock = { behavior: 'studioUnlock' };
-
-// Helper to create key codes
-export const key = (k: string, mods: Mod[] = []): { key: string; modifiers: Mod[] } => ({ 
-  key: k, 
-  modifiers: mods 
-});
-
-// Mouse button constants
-export const MB1: MouseButtonType = 'MB1';
-export const MB2: MouseButtonType = 'MB2';
-export const MB3: MouseButtonType = 'MB3';
-export const MB4: MouseButtonType = 'MB4';
-export const MB5: MouseButtonType = 'MB5';
-export const LCLK: MouseButtonType = 'LCLK';
-export const RCLK: MouseButtonType = 'RCLK';
-export const MCLK: MouseButtonType = 'MCLK';
-

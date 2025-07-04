@@ -1,4 +1,5 @@
-import { kp, type KeyPress, type Mod } from './helpers.js';
+import { kp } from './helpers.js';
+import type { ModifierKey, KeyPress } from './schemas.js';
 
 // Letter keys
 export const A = kp('A');
@@ -121,7 +122,7 @@ export const C_VOL_DN = kp('C_VOL_DN');
 export const C_MUTE = kp('C_MUTE');
 
 // Helper function to add a modifier
-const modify = (input: string | KeyPress, modifier: Mod): KeyPress => {
+const modify = (input: string | KeyPress, modifier: ModifierKey): KeyPress => {
   if (typeof input === 'string') {
     return kp(input, [modifier]);
   }
