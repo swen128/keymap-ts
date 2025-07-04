@@ -1,11 +1,11 @@
 import {
   behaviors, keys,
   type KeyPress,
-} from '../../src/index.js';
+} from 'keymap-ts';
 import type {
   Glove80Layout,
   Glove80ThumbLayout
-} from "../../src/glove80.js";
+} from "keymap-ts/glove80";
 import {hmlIndex, hmlMiddle, hmlRing, hmlPinky, hmrIndex, hmrMiddle, hmrRing, hmrPinky} from "./hold-tap.js";
 import {
   hmlIndexRing, hmlIndexMiddle, hmlIndexPinky,

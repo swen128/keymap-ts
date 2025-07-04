@@ -1,4 +1,4 @@
-import {type HoldTapDefinition} from "../../src/index.js";
+import {type HoldTapDefinition} from "keymap-ts";
 import {allRightHandPositions, allLeftHandPositions, comboSupportPositions} from "./key-positions.js";
 
 const leftHandComboTriggerPositions = [

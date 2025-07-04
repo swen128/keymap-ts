@@ -1,4 +1,4 @@
-import {behaviors, keys, type KeyPress} from '../../src/index.js';
+import {behaviors, keys, type KeyPress, type MacroBinding} from 'keymap-ts';
 
 const {mo, macro} = behaviors;
 const { 
@@ -6,7 +6,7 @@ const {
   A, S, D, F, J, K, L, SEMI
 } = keys;
 
-const createHoldMacro = (name: string, modifierKey: KeyPress, layerName: string) => 
+const createHoldMacro = (name: string, modifierKey: KeyPress, layerName: string): MacroBinding => 
   macro(name)
     .press(modifierKey)
     .behavior(mo(layerName))
@@ -15,7 +15,7 @@ const createHoldMacro = (name: string, modifierKey: KeyPress, layerName: string)
     .behavior(mo(layerName))
     .build();
 
-const createTapMacro = (name: string, key: KeyPress) => {
+const createTapMacro = (name: string, key: KeyPress): MacroBinding => {
   const modifiers = [LSHFT, LCTRL, LALT, LGUI, RSHFT, RCTRL, RALT, RGUI];
   
   const builder = modifiers.reduce(

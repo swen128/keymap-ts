@@ -1,6 +1,0 @@
-preload = ["./preload.ts"]
-
-[test]
-root = "./src"
-preload = ["./preload.ts"]
-

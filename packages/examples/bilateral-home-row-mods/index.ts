@@ -1,5 +1,5 @@
-import {behaviors, type Keymap, keys} from "../../src/index.js";
-import {glove80Layer, type Glove80Layout} from "../../src/glove80.js";
+import {behaviors, type Keymap, keys} from "keymap-ts";
+import {glove80Layer, type Glove80Layout} from "keymap-ts/glove80";
 import {bilateralHomeRowMods} from "./hrm.js";
 
 const {mo, trans, none} = behaviors;

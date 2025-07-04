@@ -1,4 +1,4 @@
-import {type HoldTapDefinition} from "../../src/index.js";
+import {type HoldTapDefinition} from "keymap-ts";
 import {notLeftFingerPositions, notRightFingerPositions} from "./key-positions.js";
 
 export const hmlPinky: HoldTapDefinition = {

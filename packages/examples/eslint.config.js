@@ -8,13 +8,14 @@ import eslintComments from 'eslint-plugin-eslint-comments';
 export default [
   js.configs.recommended,
   {
-    files: ['src/**/*.ts', 'example/**/*.ts'],
+    files: ['**/*.ts'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: './tsconfig.json',
+        project: true,
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         console: 'readonly',
@@ -94,34 +95,13 @@ export default [
     },
   },
   {
-    files: ['src/**/*.ts', 'example/**/*.ts'],
+    files: ['**/*.ts'],
     ignores: ['**/*.test.ts'],
     rules: {
       'functional/no-let': 'error',
     },
   },
   {
-    files: ['src/**/*.test.ts'],
-    rules: {
-      'functional/no-throw-statements': 'off',
-    },
-  },
-  {
-    files: ['src/**/cli.ts'],
-    rules: {
-      'no-console': 'off',
-      'functional/no-throw-statements': 'off',
-    },
-  },
-  {
-    files: ['example/**/*.ts'],
-    rules: {
-      // Relax some strict rules for examples
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      'no-console': 'off',
-    },
-  },
-  {
-    ignores: ['node_modules/', 'dist/', 'build/', '*.js', '!eslint.config.js', 'vite.config.ts', 'playground/'],
+    ignores: ['node_modules/', 'dist/'],
   },
 ];

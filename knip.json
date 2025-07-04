@@ -1,27 +1,34 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "entry": [
-    "src/index.ts",
-    "src/cli.ts",
-    "preload.ts",
-    "example/**/index.ts"
-  ],
-  "project": [
-    "src/**/*.ts",
-    "preload.ts",
-    "example/**/*.ts"
-  ],
+  "workspaces": {
+    "packages/keymap-ts": {
+      "entry": [
+        "src/index.ts",
+        "src/cli.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/examples": {
+      "entry": [
+        "**/index.ts"
+      ],
+      "project": [
+        "**/*.ts"
+      ]
+    }
+  },
   "ignore": [
     "**/*.test.ts",
     "**/*.spec.ts"
   ],
-  "ignoreDependencies": ["@commitlint/cli"],
+  "ignoreDependencies": ["@commitlint/cli", "@ryoppippi/unplugin-typia"],
   "ignoreExportsUsedInFile": true,
   "eslint": {
     "config": ["eslint.config.js"]
   },
   "typescript": {
-    "config": ["tsconfig.json"]
+    "config": ["tsconfig.json", "packages/*/tsconfig.json"]
   }
 }
-

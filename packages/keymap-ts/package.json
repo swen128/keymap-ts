@@ -1,0 +1,44 @@
+{
+  "name": "keymap-ts",
+  "version": "0.1.0",
+  "description": "TypeScript DSL for creating ZMK keyboard firmware keymaps",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./glove80": {
+      "types": "./dist/glove80.d.ts",
+      "import": "./dist/glove80.js"
+    }
+  },
+  "bin": {
+    "kts": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "bun --hot ./index.ts",
+    "build": "tspc",
+    "postbuild": "chmod +x dist/cli.js",
+    "typecheck": "tspc --noEmit",
+    "test": "bun test",
+    "lint": "eslint .",
+    "prepare": "ts-patch install",
+    "prepublishOnly": "bun run build"
+  },
+  "devDependencies": {
+    "@ryoppippi/unplugin-typia": "^2.6.5",
+    "@types/bun": "^1.2.17",
+    "ts-patch": "^3.3.0"
+  },
+  "dependencies": {
+    "neverthrow": "^8.2.0",
+    "typia": "^9.3.1"
+  }
+}

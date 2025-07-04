@@ -1,50 +1,23 @@
 {
-  "name": "keymap-ts",
-  "version": "0.1.0",
-  "description": "TypeScript DSL for creating ZMK keyboard firmware keymaps",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "name": "keymap-editor-monorepo",
+  "private": true,
   "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./glove80": {
-      "types": "./dist/glove80.d.ts",
-      "import": "./dist/glove80.js"
-    }
-  },
-  "bin": {
-    "kts": "./dist/cli.js"
-  },
-  "files": [
-    "dist"
+  "packageManager": "bun@1.2.17",
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "dev": "bun --hot ./index.ts",
-    "build": "tspc --project tsconfig.build.json",
-    "postbuild": "chmod +x dist/cli.js",
-    "typecheck": "tspc --noEmit",
-    "lint": "eslint .",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "check": "turbo run build typecheck test lint && bun knip",
     "knip": "knip",
-    "check": "concurrently \"bun typecheck\" \"bun test\" \"bun lint\" \"bun knip\"",
-    "prepare": "ts-patch install && husky",
-    "prepublishOnly": "bun check && bun run build"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "@ryoppippi/unplugin-typia": "^2.6.5",
-    "@types/bun": "^1.2.17",
-    "concurrently": "^9.2.0",
-    "husky": "^9.1.7",
-    "knip": "^5.61.3",
-    "ts-patch": "^3.3.0",
-    "typescript": "~5.8.3"
-  },
-  "dependencies": {
     "@eslint/js": "^9.30.0",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
@@ -52,7 +25,9 @@
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-functional": "^9.0.2",
     "eslint-plugin-unicorn": "^59.0.1",
-    "neverthrow": "^8.2.0",
-    "typia": "^9.3.1"
+    "husky": "^9.1.7",
+    "knip": "^5.61.3",
+    "turbo": "^2.4.2",
+    "typescript": "~5.8.3"
   }
 }

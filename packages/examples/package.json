@@ -1,0 +1,16 @@
+{
+  "name": "keymap-ts-examples",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "keymap-ts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.17"
+  }
+}
