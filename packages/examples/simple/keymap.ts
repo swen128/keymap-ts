@@ -1,20 +1,3 @@
-# keymap-ts
-
-A TypeScript DSL for creating ZMK keyboard firmware keymaps with type safety and validation.
-
-## Installation
-
-```bash
-npm install keymap-ts
-# or
-bun add keymap-ts
-```
-
-## Usage
-
-Create a keymap configuration file (e.g., `keymap.ts`), which default-exports an object of type `Keymap`:
-
-```typescript
 import {behaviors, keys, type Keymap} from 'keymap-ts';
 
 const {mo, ht, macro, trans, none} = behaviors;
@@ -75,16 +58,3 @@ const keymap: Keymap = {
 };
 
 export default keymap;
-```
-
-Then run the following command to build the keymap in the Devicetree format:
-
-```bash
-npx kts build keymap.ts output.keymap
-```
-
-More examples can be found in [packages/examples/](https://github.com/swen128/keymap-ts/tree/main/packages/examples).
-
-## License
-
-MIT

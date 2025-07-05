@@ -12,7 +12,8 @@
     },
     "packages/examples": {
       "entry": [
-        "**/index.ts"
+        "**/index.ts",
+        "simple/keymap.ts"
       ],
       "project": [
         "**/*.ts"

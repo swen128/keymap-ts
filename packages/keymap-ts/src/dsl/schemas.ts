@@ -278,13 +278,13 @@ export interface MacroDefinition {
   tapMs?: number;
 }
 
-export interface MacroBinding {
+export interface MacroBehavior {
   behavior: 'macro';
   macro: MacroDefinition;
 }
 
 export type Behavior =
-  | KeyPress | ModTap | LayerTap | ToLayer | MacroBinding | Transparent | None
+  | KeyPress | ModTap | LayerTap | ToLayer | MacroBehavior | Transparent | None
   | KeyToggle | StickyKey | CustomStickyKey | CapsWord | KeyRepeat
   | MomentaryLayer | ToggleLayer | StickyLayer | CustomStickyLayer
   | MouseButton | MouseMove | MouseScroll | SystemReset | Bootloader

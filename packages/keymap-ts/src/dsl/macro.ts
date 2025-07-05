@@ -1,4 +1,4 @@
-import type {Behavior, KeyPress, MacroAction, MacroBinding} from './schemas.js';
+import type {Behavior, KeyPress, MacroAction, MacroBehavior} from './schemas.js';
 
 /**
  * Creates a macro builder for defining keyboard macros.
@@ -104,7 +104,7 @@ export class MacroBuilder {
     );
   }
 
-  build(): MacroBinding {
+  build(): MacroBehavior {
     return {
       behavior: 'macro',
       macro: {
