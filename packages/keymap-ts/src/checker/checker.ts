@@ -56,11 +56,11 @@ function validateIdentifierName(
   path: string[],
   errors: ValidationError[]
 ): void {
-  const identifierPattern = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+  const identifierPattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
   if (!identifierPattern.test(name)) {
     errors.push({
       path,
-      message: `${type} name '${name}' contains invalid characters. Use only letters, numbers, and underscores, starting with a letter`
+      message: `${type} name '${name}' contains invalid characters. Use only letters, numbers, and underscores`
     });
   }
 }
@@ -589,6 +589,103 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
       default:
         behaviorDefinitions.push(def);
         return;
+    }
+  });
+  
+  // Cross-reference validations
+  
+  // Create a set of all macro names for validation
+  const allMacroNames = new Set<string>(allMacros.map(m => m.name));
+  
+  // Validate macro references in bindings
+  function validateMacroReferences(binding: CheckedBinding, path: string[]): void {
+    switch (binding.behavior) {
+      case 'macro':
+        if (!allMacroNames.has(binding.macroName)) {
+          errors.push({
+            path: [...path, 'macroName'],
+            message: `Macro "${binding.macroName}" is not defined`
+          });
+        }
+        break;
+      case 'holdTap':
+        validateMacroReferences(binding.holdBinding, [...path, 'holdBinding']);
+        validateMacroReferences(binding.tapBinding, [...path, 'tapBinding']);
+        break;
+      case 'tapDance':
+        binding.bindings.forEach((b, i) => 
+          validateMacroReferences(b, [...path, 'bindings', i.toString()]));
+        break;
+      case 'modMorph':
+        validateMacroReferences(binding.defaultBinding, [...path, 'defaultBinding']);
+        validateMacroReferences(binding.morphedBinding, [...path, 'morphedBinding']);
+        break;
+      // Other binding types don't have macro references
+      case 'keyPress':
+      case 'modTap':
+      case 'layerTap':
+      case 'toLayer':
+      case 'transparent':
+      case 'none':
+      case 'keyToggle':
+      case 'stickyKey':
+      case 'customStickyKey':
+      case 'capsWord':
+      case 'keyRepeat':
+      case 'momentaryLayer':
+      case 'toggleLayer':
+      case 'stickyLayer':
+      case 'customStickyLayer':
+      case 'mouseButton':
+      case 'mouseMove':
+      case 'mouseScroll':
+      case 'systemReset':
+      case 'bootloader':
+      case 'bluetooth':
+      case 'output':
+      case 'rgbUnderglow':
+      case 'backlight':
+      case 'extPower':
+      case 'softOff':
+      case 'studioUnlock':
+        break;
+    }
+  }
+  
+  // Validate macro references in all layers
+  checkedLayers.forEach((layer, layerIndex) => {
+    layer.bindings.forEach((binding, bindingIndex) => {
+      validateMacroReferences(binding, ['layers', layerIndex.toString(), 'bindings', bindingIndex.toString()]);
+    });
+  });
+  
+  // Validate macro references in combos
+  keymap.combos?.forEach((combo, comboIndex) => {
+    // Note: combos still have unchecked bindings, need to check the binding first
+    const checkedBinding = checkBinding(combo.binding, allCheckedMacroDefinitions, [], ['combos', comboIndex.toString(), 'binding'], new Map(), layerNameToIndex);
+    validateMacroReferences(checkedBinding.binding, ['combos', comboIndex.toString(), 'binding']);
+  });
+  
+  // Validate conditional layers
+  keymap.conditionalLayers?.forEach((condLayer, index) => {
+    const path = ['conditionalLayers', index.toString()];
+    
+    // Validate ifLayers
+    condLayer.ifLayers.forEach((layerName, layerIndex) => {
+      if (!validLayerNames.has(layerName)) {
+        errors.push({
+          path: [...path, 'ifLayers', layerIndex.toString()],
+          message: `Layer "${layerName}" in conditional layer does not exist`
+        });
+      }
+    });
+    
+    // Validate thenLayer
+    if (!validLayerNames.has(condLayer.thenLayer)) {
+      errors.push({
+        path: [...path, 'thenLayer'],
+        message: `Layer "${condLayer.thenLayer}" in conditional layer does not exist`
+      });
     }
   });
 

@@ -133,6 +133,18 @@ describe('transpiler', () => {
           bindings: [
             { behavior: 'keyPress', code: { key: 'UP', modifiers: [] } }
           ]
+        },
+        {
+          name: 'lower',
+          bindings: []
+        },
+        {
+          name: 'raise',
+          bindings: []
+        },
+        {
+          name: 'adjust',
+          bindings: []
         }
       ],
       combos: [{
@@ -191,6 +203,21 @@ describe('transpiler', () => {
     nav_layer {
         bindings = <
             &kp UP
+        >;
+    };
+
+    lower_layer {
+        bindings = <
+        >;
+    };
+
+    raise_layer {
+        bindings = <
+        >;
+    };
+
+    adjust_layer {
+        bindings = <
         >;
     };
 
