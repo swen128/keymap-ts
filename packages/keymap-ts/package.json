@@ -25,7 +25,9 @@
     "url": "git+https://github.com/swen128/keymap-ts.git",
     "directory": "packages/keymap-ts"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -33,15 +35,17 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./glove80": {
       "types": "./dist/glove80.d.ts",
-      "import": "./dist/glove80.js"
+      "import": "./dist/glove80.js",
+      "default": "./dist/glove80.js"
     }
   },
   "bin": {
-    "kts": "./dist/cli.js"
+    "kts": "dist/cli.js"
   },
   "scripts": {
     "dev": "bun --hot ./index.ts",
@@ -60,6 +64,7 @@
     "ts-patch": "^3.3.0"
   },
   "dependencies": {
+    "jiti": "^2.4.2",
     "neverthrow": "^8.2.0",
     "typia": "^9.3.1"
   }

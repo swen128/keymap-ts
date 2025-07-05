@@ -3,10 +3,9 @@
 import {err, ok, Result, ResultAsync} from 'neverthrow';
 import {transpile, type TranspileError} from './transpiler.js';
 import {writeFileSync} from 'fs';
+import {createJiti} from 'jiti';
 import {resolve} from 'path';
 import {pathToFileURL} from 'url';
-import {safeParse} from './utils/safeParse.js';
-import {validateModule} from './dsl/validators.js';
 
 function showHelp(): void {
   console.log(`
@@ -59,16 +58,16 @@ function parseArgs(args: string[]): Result<ParsedArgs, string> {
   return err(`Unknown command '${command}'\nRun with --help for usage information`);
 }
 
-const importFile = (filePath: string): ResultAsync<unknown, string> =>
-  ResultAsync.fromPromise(
-    import((pathToFileURL(resolve(filePath)).href)),
-    (error) => `Failed to import file: ${error instanceof Error ? error.message : `${error}`}`
-  )
+const importFile = (filePath: string): ResultAsync<unknown, string> => {
+  const absolutePath = resolve(filePath);
+  const fileUrl = pathToFileURL(absolutePath).href;
+  const jiti = createJiti(import.meta.url);
 
-const loadDefaultExport = (mod: unknown): Result<unknown, string> =>
-  safeParse(validateModule)(mod)
-    .map(data => data.default)
-    .mapErr(() => "The module does not have the default export.")
+  return ResultAsync.fromPromise(
+    Promise.resolve(jiti.import(fileUrl, {default: true})),
+    (error) => `Failed to import file: ${error instanceof Error ? error.message : String(error)}`
+  );
+}
 
 const formatError = (error: TranspileError): string => {
   const path = error.path !== undefined ? error.path.join('.') : '';
@@ -79,14 +78,13 @@ const transpile_ = (keymap: unknown): Result<string, string> =>
   transpile(keymap).mapErr(errors => errors.map(formatError).join('\n\n'));
 
 const build = async ({inputFile, outputFile}: { inputFile: string, outputFile: string }): Promise<void> => {
-  const result = await importFile(inputFile)
-    .andThen(loadDefaultExport)
-    .andThen(transpile_)
+  const result = await importFile(inputFile).andThen(transpile_)
 
   if (result.isOk()) {
     writeFileSync(outputFile, result.value)
   } else {
-    console.error(result.error)
+    console.error(result.error);
+    process.exit(1);
   }
 }
 
@@ -96,7 +94,7 @@ async function main(): Promise<void> {
 
   if (parseResult.isErr()) {
     console.error(`Invalid command arguments: ${parseResult.error}`);
-    return;
+    process.exit(1);
   }
 
   const command = parseResult.value;

@@ -31,11 +31,12 @@
     },
     "packages/keymap-ts": {
       "name": "keymap-ts",
-      "version": "0.1.0",
+      "version": "0.1.0-alpha.0",
       "bin": {
         "kts": "./dist/cli.js",
       },
       "dependencies": {
+        "jiti": "^2.4.2",
         "neverthrow": "^8.2.0",
         "typia": "^9.3.1",
       },
