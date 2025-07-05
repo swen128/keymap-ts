@@ -343,15 +343,14 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
       case 'momentaryLayer':
       case 'toggleLayer':
       case 'stickyLayer':
+        break;
       case 'macro': {
         // Process behavior actions within the macro
-        if (binding.behavior === 'macro') {
-          binding.macro.bindings.forEach((action) => {
-            if (action.type === 'behavior') {
-              collectBehaviorDefinitions(action.binding);
-            }
-          });
-        }
+        binding.macro.bindings.forEach((action) => {
+          if (action.type === 'behavior') {
+            collectBehaviorDefinitions(action.binding);
+          }
+        });
         break;
       }
       case 'mouseButton':
@@ -402,10 +401,6 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
       }
     });
   });
-
-  if (errors.length > 0) {
-    return err(errors);
-  }
   // Extract user-defined macros from macro bindings
   const extractedMacros: MacroDefinition[] = [];
   const processedMacros: CheckedMacroDefinition[] = [];

@@ -637,6 +637,300 @@ describe('checker', () => {
     }
   });
 
+  it('should validate Bluetooth profile range', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          { behavior: 'bluetooth', action: 'BT_SEL', profile: 5 }, // Invalid: > 4
+          { behavior: 'bluetooth', action: 'BT_SEL', profile: -1 }, // Invalid: < 0
+          { behavior: 'bluetooth', action: 'BT_SEL', profile: 2 } // Valid
+        ]
+      }]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toHaveLength(2);
+      expect(result.error[0]?.message).toContain('Bluetooth profile must be between 0 and 4, got 5');
+      expect(result.error[1]?.message).toContain('Bluetooth profile must be between 0 and 4, got -1');
+    }
+  });
+
+  it('should validate RGB values', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          { behavior: 'rgbUnderglow', action: 'RGB_COLOR_HSB', hue: 400, saturation: 150, brightness: -10 }
+        ]
+      }]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toHaveLength(3);
+      expect(result.error[0]?.message).toContain('RGB hue must be between 0 and 360, got 400');
+      expect(result.error[1]?.message).toContain('RGB saturation must be between 0 and 100, got 150');
+      expect(result.error[2]?.message).toContain('RGB brightness must be between 0 and 100, got -10');
+    }
+  });
+
+  it('should validate timing parameters in behavior definitions', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          {
+            behavior: 'holdTap',
+            definition: {
+              name: 'ht1',
+              compatible: 'zmk,behavior-hold-tap',
+              tappingTermMs: 0, // Invalid: < 50
+              quickTapMs: 600, // Invalid: > 500
+              requirePriorIdleMs: 600 // Invalid: > 500
+            },
+            holdBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
+            tapBinding: { behavior: 'keyPress', code: { key: 'B', modifiers: [] } }
+          }
+        ]
+      }]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toHaveLength(3);
+      expect(result.error.some(e => e.message.includes('tappingTermMs must be between 50ms and 1000ms'))).toBe(true);
+      expect(result.error.some(e => e.message.includes('quickTapMs must be between 50ms and 500ms'))).toBe(true);
+      expect(result.error.some(e => e.message.includes('requirePriorIdleMs must be between 50ms and 500ms'))).toBe(true);
+    }
+  });
+
+  it('should validate behavior and macro names', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          {
+            behavior: 'holdTap',
+            definition: {
+              name: '123invalid', // Invalid: starts with number
+              compatible: 'zmk,behavior-hold-tap'
+            },
+            holdBinding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } },
+            tapBinding: { behavior: 'keyPress', code: { key: 'B', modifiers: [] } }
+          },
+          {
+            behavior: 'macro',
+            macro: {
+              name: 'test-macro', // Invalid: contains dash
+              bindings: [{ type: 'tap', code: { key: 'A', modifiers: [] } }]
+            }
+          }
+        ]
+      }]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toHaveLength(2);
+      expect(result.error.some(e => e.message.includes("Behavior name '123invalid' contains invalid characters"))).toBe(true);
+      expect(result.error.some(e => e.message.includes("Macro name 'test-macro' contains invalid characters"))).toBe(true);
+    }
+  });
+
+  it('should validate combo key positions', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: []
+      }],
+      combos: [
+        {
+          name: 'single_key',
+          keyPositions: ['0'], // Invalid: < 2
+          binding: { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
+        },
+        {
+          name: 'too_many',
+          keyPositions: ['0', '1', '2', '3', '4', '5', '6', '7', '8'], // Invalid: > 8
+          binding: { behavior: 'keyPress', code: { key: 'B', modifiers: [] } }
+        },
+        {
+          name: 'non_numeric',
+          keyPositions: ['0', 'abc'], // Invalid: non-numeric
+          binding: { behavior: 'keyPress', code: { key: 'C', modifiers: [] } }
+        }
+      ]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toHaveLength(3);
+      expect(result.error.some(e => e.message.includes('Combo key positions must have at least 2 items, got 1'))).toBe(true);
+      expect(result.error.some(e => e.message.includes('Combo key positions must have at most 8 items, got 9'))).toBe(true);
+      expect(result.error.some(e => e.message.includes('Key position must be a numeric string, got "abc"'))).toBe(true);
+    }
+  });
+
+  it('should validate tap-dance bindings count', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          {
+            behavior: 'tapDance',
+            definition: { name: 'td1', compatible: 'zmk,behavior-tap-dance' },
+            bindings: [
+              { behavior: 'keyPress', code: { key: 'A', modifiers: [] } }
+            ] // Invalid: only 1 binding
+          },
+          {
+            behavior: 'tapDance',
+            definition: { name: 'td2', compatible: 'zmk,behavior-tap-dance' },
+            bindings: Array(11).fill({ behavior: 'keyPress', code: { key: 'A', modifiers: [] } })
+            // Invalid: 11 bindings > 10
+          }
+        ]
+      }]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toHaveLength(2);
+      expect(result.error.some(e => e.message.includes('Tap-dance bindings must have at least 2 items, got 1'))).toBe(true);
+      expect(result.error.some(e => e.message.includes('Tap-dance bindings must have at most 10 items, got 11'))).toBe(true);
+    }
+  });
+
+  it('should validate macro bindings length', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          {
+            behavior: 'macro',
+            macro: {
+              name: 'huge_macro',
+              bindings: Array(257).fill({ type: 'tap' as const, code: { key: 'A', modifiers: [] } })
+              // Invalid: 257 > 256
+            }
+          }
+        ]
+      }]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.some(e => e.message.includes('Macro bindings must have at most 256 items, got 257'))).toBe(true);
+    }
+  });
+
+  it('should validate macro references', () => {
+    // This test validates that macro references in CheckedBindings are properly validated.
+    // Since the DSL doesn't support direct macro references, this validation primarily
+    // applies to synthetic macros created during the checking process.
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [
+          { behavior: 'macro', macro: { name: 'defined_macro', bindings: [] } },
+          {
+            behavior: 'macro',
+            macro: {
+              name: 'macro_with_behavior',
+              bindings: [{
+                type: 'behavior',
+                binding: {
+                  behavior: 'macro',
+                  macro: {
+                    name: 'nested_macro',
+                    bindings: [{ type: 'tap', code: { key: 'A', modifiers: [] } }]
+                  }
+                }
+              }]
+            }
+          }
+        ]
+      }]
+    };
+    
+    const result = check(keymap);
+    
+    // This test should pass as all macro references are valid
+    expect(result.isOk()).toBe(true);
+  });
+
+  it('should validate conditional layer references', () => {
+    const keymap: Keymap = {
+      layers: [
+        { name: 'base', bindings: [] },
+        { name: 'nav', bindings: [] }
+      ],
+      conditionalLayers: [
+        {
+          name: 'test',
+          ifLayers: ['base', 'undefined_layer'], // Invalid reference
+          thenLayer: 'also_undefined' // Invalid reference
+        }
+      ]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toHaveLength(2);
+      expect(result.error.some(e => e.message.includes('Layer "undefined_layer" in conditional layer does not exist'))).toBe(true);
+      expect(result.error.some(e => e.message.includes('Layer "also_undefined" in conditional layer does not exist'))).toBe(true);
+    }
+  });
+
+  it('should validate macro wait times', () => {
+    const keymap: Keymap = {
+      layers: [{
+        name: 'default',
+        bindings: [{
+          behavior: 'macro',
+          macro: {
+            name: 'test',
+            waitMs: 0, // Invalid: < 1
+            tapMs: 20000, // Invalid: > 10000
+            bindings: [
+              { type: 'wait', ms: -5 }, // Invalid: < 1
+              { type: 'wait', ms: 15000 } // Invalid: > 10000
+            ]
+          }
+        }]
+      }]
+    };
+    
+    const result = check(keymap);
+    
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error).toHaveLength(4);
+      expect(result.error.some(e => e.message.includes('waitMs must be between 1ms and 10000ms, got 0ms'))).toBe(true);
+      expect(result.error.some(e => e.message.includes('tapMs must be between 1ms and 10000ms, got 20000ms'))).toBe(true);
+      expect(result.error.some(e => e.message.includes('ms must be between 1ms and 10000ms, got -5ms'))).toBe(true);
+      expect(result.error.some(e => e.message.includes('ms must be between 1ms and 10000ms, got 15000ms'))).toBe(true);
+    }
+  });
+
   it('should collect unique bindings for behaviors used in multiple contexts', () => {
     const keymap: Keymap = {
       layers: [
