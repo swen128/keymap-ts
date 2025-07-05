@@ -33,6 +33,60 @@ type LayerIndex = number;
 type BehaviorUsageMap = Map<BehaviorName, Set<BehaviorName>>;
 type LayerNameToIndexMap = Map<LayerName, LayerIndex>;
 
+// Validation helper functions
+function validateTimingParameter(
+  value: number | undefined,
+  paramName: string,
+  min: number,
+  max: number,
+  path: string[],
+  errors: ValidationError[]
+): void {
+  if (value !== undefined && (value < min || value > max)) {
+    errors.push({
+      path: [...path, paramName],
+      message: `${paramName} must be between ${min}ms and ${max}ms, got ${value}ms`
+    });
+  }
+}
+
+function validateIdentifierName(
+  name: string,
+  type: string,
+  path: string[],
+  errors: ValidationError[]
+): void {
+  const identifierPattern = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+  if (!identifierPattern.test(name)) {
+    errors.push({
+      path,
+      message: `${type} name '${name}' contains invalid characters. Use only letters, numbers, and underscores, starting with a letter`
+    });
+  }
+}
+
+function validateArrayLength(
+  array: unknown[],
+  type: string,
+  min: number | undefined,
+  max: number | undefined,
+  path: string[],
+  errors: ValidationError[]
+): void {
+  if (min !== undefined && array.length < min) {
+    errors.push({
+      path,
+      message: `${type} must have at least ${min} items, got ${array.length}`
+    });
+  }
+  if (max !== undefined && array.length > max) {
+    errors.push({
+      path,
+      message: `${type} must have at most ${max} items, got ${array.length}`
+    });
+  }
+}
+
 type BaseBehaviorDef =
   StickyKeyDefinition
   | StickyLayerDefinition
@@ -125,6 +179,84 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
       case 'studioUnlock':
         break;
     }
+    
+    // Additional validations for specific behaviors
+    switch (binding.behavior) {
+      case 'bluetooth':
+        if (binding.action === 'BT_SEL' && binding.profile !== undefined) {
+          if (binding.profile < 0 || binding.profile > 4) {
+            errors.push({
+              path: [...path, 'profile'],
+              message: `Bluetooth profile must be between 0 and 4, got ${binding.profile}`
+            });
+          }
+        }
+        break;
+      case 'rgbUnderglow':
+        if (binding.action === 'RGB_COLOR_HSB') {
+          if (binding.hue !== undefined && (binding.hue < 0 || binding.hue > 360)) {
+            errors.push({
+              path: [...path, 'hue'],
+              message: `RGB hue must be between 0 and 360, got ${binding.hue}`
+            });
+          }
+          if (binding.saturation !== undefined && (binding.saturation < 0 || binding.saturation > 100)) {
+            errors.push({
+              path: [...path, 'saturation'],
+              message: `RGB saturation must be between 0 and 100, got ${binding.saturation}`
+            });
+          }
+          if (binding.brightness !== undefined && (binding.brightness < 0 || binding.brightness > 100)) {
+            errors.push({
+              path: [...path, 'brightness'],
+              message: `RGB brightness must be between 0 and 100, got ${binding.brightness}`
+            });
+          }
+        }
+        break;
+      case 'backlight':
+        if (binding.action === 'BL_SET' && binding.brightness !== undefined) {
+          if (binding.brightness < 0 || binding.brightness > 100) {
+            errors.push({
+              path: [...path, 'brightness'],
+              message: `Backlight brightness must be between 0 and 100, got ${binding.brightness}`
+            });
+          }
+        }
+        break;
+      case 'softOff':
+        validateTimingParameter(binding.holdTimeMs, 'holdTimeMs', 100, 10000, path, errors);
+        break;
+      // No additional validation needed for these behaviors
+      case 'keyPress':
+      case 'stickyKey':
+      case 'keyToggle':
+      case 'momentaryLayer':
+      case 'toLayer':
+      case 'toggleLayer':
+      case 'stickyLayer':
+      case 'layerTap':
+      case 'modTap':
+      case 'holdTap':
+      case 'tapDance':
+      case 'modMorph':
+      case 'customStickyKey':
+      case 'customStickyLayer':
+      case 'output':
+      case 'extPower':
+      case 'mouseButton':
+      case 'mouseMove':
+      case 'mouseScroll':
+      case 'transparent':
+      case 'none':
+      case 'bootloader':
+      case 'systemReset':
+      case 'capsWord':
+      case 'keyRepeat':
+      case 'studioUnlock':
+      case 'macro':
+        break;
+    }
   }
 
   // Collect behavior definitions from bindings
@@ -139,6 +271,9 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
             message: `Behavior "${binding.definition.name}" has conflicting definitions`
           });
         } else {
+          // Validate timing parameters
+          validateTimingParameter(binding.definition.releaseAfterMs, 'releaseAfterMs', 100, 10000, ['behaviors', binding.definition.name], errors);
+          validateIdentifierName(binding.definition.name, 'Behavior', ['behaviors', binding.definition.name], errors);
           collectedBehaviorDefs.set(binding.definition.name, binding.definition);
         }
         break;
@@ -151,6 +286,11 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
             message: `Behavior "${binding.definition.name}" has conflicting definitions`
           });
         } else {
+          // Validate timing parameters
+          validateTimingParameter(binding.definition.tappingTermMs, 'tappingTermMs', 50, 1000, ['behaviors', binding.definition.name], errors);
+          validateTimingParameter(binding.definition.quickTapMs, 'quickTapMs', 50, 500, ['behaviors', binding.definition.name], errors);
+          validateTimingParameter(binding.definition.requirePriorIdleMs, 'requirePriorIdleMs', 50, 500, ['behaviors', binding.definition.name], errors);
+          validateIdentifierName(binding.definition.name, 'Behavior', ['behaviors', binding.definition.name], errors);
           collectedBehaviorDefs.set(binding.definition.name, binding.definition);
         }
         collectBehaviorDefinitions(binding.tapBinding);
@@ -165,6 +305,9 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
             message: `Behavior "${binding.definition.name}" has conflicting definitions`
           });
         } else {
+          // Validate timing parameters
+          validateTimingParameter(binding.definition.tappingTermMs, 'tappingTermMs', 50, 1000, ['behaviors', binding.definition.name], errors);
+          validateIdentifierName(binding.definition.name, 'Behavior', ['behaviors', binding.definition.name], errors);
           collectedBehaviorDefs.set(binding.definition.name, binding.definition);
         }
         binding.bindings.forEach((b: Behavior) => collectBehaviorDefinitions(b));
@@ -178,6 +321,8 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
             message: `Behavior "${binding.definition.name}" has conflicting definitions`
           });
         } else {
+          // Validate name
+          validateIdentifierName(binding.definition.name, 'Behavior', ['behaviors', binding.definition.name], errors);
           collectedBehaviorDefs.set(binding.definition.name, binding.definition);
         }
         collectBehaviorDefinitions(binding.defaultBinding);
@@ -242,6 +387,20 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
     const path = ['combos', comboIndex.toString(), 'binding'];
     validateLayerReferences(combo.binding, path);
     collectBehaviorDefinitions(combo.binding);
+    
+    // Validate key positions
+    const keyPosPath = ['combos', comboIndex.toString(), 'keyPositions'];
+    validateArrayLength(combo.keyPositions, 'Combo key positions', 2, 8, keyPosPath, errors);
+    
+    // Validate each key position is numeric
+    combo.keyPositions.forEach((pos, posIndex) => {
+      if (!/^\d+$/.test(pos)) {
+        errors.push({
+          path: [...keyPosPath, posIndex.toString()],
+          message: `Key position must be a numeric string, got "${pos}"`
+        });
+      }
+    });
   });
 
   if (errors.length > 0) {
@@ -254,8 +413,18 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
   // Process macro behavior actions to track usage and convert layer names
   function processMacroBehaviorActions(macro: MacroDefinition): CheckedMacroDefinition {
     const processedBindings: CheckedMacroAction[] = [];
+    
+    // Validate macro name
+    validateIdentifierName(macro.name, 'Macro', ['macros', macro.name], errors);
+    
+    // Validate timing parameters
+    validateTimingParameter(macro.waitMs, 'waitMs', 1, 10000, ['macros', macro.name], errors);
+    validateTimingParameter(macro.tapMs, 'tapMs', 1, 10000, ['macros', macro.name], errors);
+    
+    // Validate array length
+    validateArrayLength(macro.bindings, 'Macro bindings', undefined, 256, ['macros', macro.name, 'bindings'], errors);
 
-    macro.bindings.forEach(action => {
+    macro.bindings.forEach((action, actionIndex) => {
       if (action.type === 'behavior') {
         // Process the behavior action to track usage and convert layer names
         const result = checkBinding(
@@ -274,6 +443,10 @@ export function check(keymap: Keymap): Result<CheckedKeymap, ValidationError[]> 
           type: 'behavior',
           binding: result.binding
         });
+      } else if (action.type === 'wait') {
+        // Validate wait action timing
+        validateTimingParameter(action.ms, 'ms', 1, 10000, ['macros', macro.name, 'bindings', actionIndex.toString()], errors);
+        processedBindings.push(action);
       } else {
         // Keep other action types as-is (they're already in checked format)
         processedBindings.push(action);
@@ -588,6 +761,9 @@ function checkBinding(
     }
     case 'tapDance': {
       const checkedBindings: SimpleBinding[] = [];
+      
+      // Validate tap-dance has at least 2 bindings
+      validateArrayLength(binding.bindings, 'Tap-dance bindings', 2, 10, [...path, 'bindings'], errors);
 
       const usedBehaviors = behaviorUsageMap.get(binding.definition.name) || new Set();
 

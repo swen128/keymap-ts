@@ -1,0 +1,21 @@
+{
+  "id": "correctness-checks",
+  "started": "2025-01-05T18:47:00Z",
+  "lastUpdated": "2025-01-05T18:59:00Z",
+  "status": "complete",
+  "phase": "complete",
+  "progress": {
+    "discovery": { "answered": 5, "total": 5 },
+    "detail": { "answered": 5, "total": 5 }
+  },
+  "contextFiles": [
+    "packages/keymap-ts/src/checker/checker.ts",
+    "packages/keymap-ts/src/checker/types.ts",
+    "packages/keymap-ts/src/dsl/schemas.ts"
+  ],
+  "relatedFeatures": [
+    "Layer validation",
+    "Behavior definition collection",
+    "Error accumulation pattern"
+  ]
+}
