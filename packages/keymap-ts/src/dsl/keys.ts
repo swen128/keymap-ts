@@ -109,6 +109,29 @@ export const RBKT = kp('RBKT');
 export const BSLH = kp('BSLH');
 export const FSLH = kp('FSLH');
 
+// Symbols
+export const EXCL = kp('EXCL');
+export const AT = kp('AT');
+export const HASH = kp('HASH');
+export const DLLR = kp('DLLR');
+export const PRCNT = kp('PRCNT');
+export const CARET = kp('CARET');
+export const AMPS = kp('AMPS');
+export const STAR = kp('STAR');
+export const LPAR = kp('LPAR');
+export const RPAR = kp('RPAR');
+export const LBRC = kp('LBRC');
+export const RBRC = kp('RBRC');
+export const PLUS = kp('PLUS');
+export const UNDER = kp('UNDER');
+export const PIPE = kp('PIPE');
+export const TILDE = kp('TILDE');
+export const COLON = kp('COLON');
+export const DQT = kp('DQT');
+export const LT = kp('LT');
+export const GT = kp('GT');
+export const QMARK = kp('QMARK');
+
 // Media keys
 export const C_PP = kp('C_PP');
 export const C_NEXT = kp('C_NEXT');
@@ -138,17 +161,3 @@ export const RC = (input: string | KeyPress): KeyPress => modify(input, 'RC');
 export const RS = (input: string | KeyPress): KeyPress => modify(input, 'RS');
 export const RA = (input: string | KeyPress): KeyPress => modify(input, 'RA');
 export const RG = (input: string | KeyPress): KeyPress => modify(input, 'RG');
-
-// Additional symbols
-export const EXCL = kp('EXCL');
-export const AT = kp('AT');
-export const HASH = kp('HASH');
-export const DLLR = kp('DLLR');
-export const PRCNT = kp('PRCNT');
-export const CARET = kp('CARET');
-export const AMPS = kp('AMPS');
-export const STAR = kp('STAR');
-export const LPAR = kp('LPAR');
-export const RPAR = kp('RPAR');
-export const LBRC = kp('LBRC');
-export const RBRC = kp('RBRC');

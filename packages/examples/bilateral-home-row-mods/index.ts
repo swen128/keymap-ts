@@ -2,20 +2,22 @@ import {behaviors, type Keymap, keys} from "keymap-ts";
 import {type Glove80Layer, glove80Layer} from "keymap-ts/glove80";
 import {bilateralHomeRowMods} from "./hrm.js";
 
-const {mo, trans, none} = behaviors;
+const {mo, none, sk} = behaviors;
 
 const {
   F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
   EQUAL, N1, N2, N3, N4, N5, N6, N7, N8, N9, N0,
   BSPC, DEL, TAB, ESC, GRAVE, END, LEFT, RIGHT,
-  LSHFT, LCTRL, LALT, LGUI,
+  LSHFT, LCTRL, LALT, LGUI, RSHFT,
   Q, W, E, R, T, Y, U, I, O, P,
   A, S, D, F, G, H, J, K, L, SEMI,
   Z, X, C, V, B, N, M, COMMA, DOT, FSLH,
-  MINUS, BSLH, SQT, RSHFT, UP, DOWN, LBKT, RBKT,
-  PAGE_UP, PAGE_DOWN, RET, SPACE,
+  MINUS, BSLH, SQT, UP, DOWN, LBKT, RBKT,
+  PAGE_UP, PAGE_DOWN, RET, SPACE, INS,
   EXCL, AT, HASH, DLLR, PRCNT, CARET, AMPS, STAR,
-  LPAR, RPAR, LBRC, RBRC, HOME
+  LPAR, RPAR, LBRC, RBRC, HOME,
+  PIPE, LT, GT, UNDER, PLUS, QMARK, COLON, DQT, TILDE,
+  LS
 } = keys;
 
 const baseLayer: Glove80Layer = {
@@ -52,12 +54,13 @@ const baseLayer: Glove80Layer = {
   }
 };
 
-const bhrmLayers = bilateralHomeRowMods(baseLayer, {
+const mods = {
   index: LGUI,
   middle: LALT,
   ring: LCTRL,
   pinky: LSHFT
-});
+}
+const bhrmLayers = bilateralHomeRowMods(baseLayer, mods);
 
 const keymap: Keymap = {
   includes: [
@@ -72,30 +75,30 @@ const keymap: Keymap = {
       layout: {
         left: {
           finger: [
-            [trans, trans, trans, trans, trans],
-            [trans, EXCL, AT, HASH, DLLR, PRCNT],
-            [trans, trans, LBKT, RBKT, trans, trans],
-            [trans, trans, LPAR, RPAR, trans, trans],
-            [trans, trans, LBRC, RBRC, trans, trans],
-            [trans, trans, trans, trans, trans]
+            [none, none, none, none, none],
+            [GRAVE, RBKT, LPAR, RPAR, COMMA, DOT],
+            [LBKT, EXCL, LBRC, RBRC, SEMI, QMARK],
+            [HASH, CARET, EQUAL, UNDER, DLLR, STAR],
+            [TILDE, LT, PIPE, MINUS, GT, FSLH],
+            [none, AMPS, SQT, DQT, PLUS]
           ],
           thumb: [
-            [trans, trans, trans],
-            [trans, trans, trans]
+            [BSLH, DOT, STAR],
+            [PRCNT, COLON, AT]
           ]
         },
         right: {
           finger: [
-            [trans, trans, trans, trans, trans],
-            [CARET, AMPS, STAR, MINUS, EQUAL, trans],
-            [trans, trans, trans, trans, trans, trans],
-            [trans, trans, trans, trans, trans, trans],
-            [trans, trans, trans, trans, trans, trans],
-            [trans, trans, trans, trans, trans]
+            [none, none, none, none, none],
+            [none, none, none, none, none, none],
+            [GRAVE, sk(mods.pinky), sk(mods.index), sk(mods.middle), sk(mods.ring), none],
+            [DQT, BSPC, TAB, SPACE, RET, none],
+            [SQT, DEL, LS(TAB), INS, ESC, none],
+            [none, none, none, none, none]
           ],
           thumb: [
-            [trans, trans, trans],
-            [trans, trans, trans]
+            [none, none, none],
+            [none, none, none]
           ]
         }
       }
