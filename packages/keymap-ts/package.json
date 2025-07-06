@@ -1,6 +1,6 @@
 {
   "name": "keymap-ts",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "TypeScript DSL for creating ZMK keyboard firmware keymaps with type safety and validation",
   "license": "MIT",
   "author": "PND",
@@ -9,12 +9,7 @@
     "keyboard",
     "keymap",
     "firmware",
-    "typescript",
-    "dsl",
-    "mechanical-keyboard",
-    "glove80",
-    "ergonomic",
-    "qmk"
+    "typescript"
   ],
   "homepage": "https://github.com/swen128/keymap-ts#readme",
   "bugs": {
@@ -56,6 +51,8 @@
     "lint": "eslint .",
     "check": "turbo run typecheck test lint",
     "prepare": "ts-patch install",
+    "prepack": "rm -f README.md && cp ../../README.md .",
+    "postpack": "rm -f README.md",
     "prepublishOnly": "turbo run build check"
   },
   "devDependencies": {
