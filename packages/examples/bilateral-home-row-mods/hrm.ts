@@ -1,6 +1,8 @@
 import {
-  behaviors, keys,
+  type Behavior,
+  behaviors,
   type KeyPress,
+  type MacroBehavior,
 } from 'keymap-ts';
 import type {
   Glove80Layout,
@@ -17,13 +19,6 @@ import {
   hmrRingIndex, hmrRingMiddle, hmrRingPinky,
   hmrPinkyIndex, hmrPinkyMiddle, hmrPinkyRing,
 } from "./hold-tap-combos.js";
-import {
-  hrmLeftPinkyHold, hrmLeftRingHold, hrmLeftMiddleHold, hrmLeftIndexHold,
-  hrmRightIndexHold, hrmRightMiddleHold, hrmRightRingHold, hrmRightPinkyHold,
-  hrmLeftPinkyTap, hrmLeftRingTap, hrmLeftMiddleTap, hrmLeftIndexTap,
-  hrmRightIndexTap, hrmRightMiddleTap, hrmRightRingTap, hrmRightPinkyTap,
-  bilateralHrmMacros
-} from "./macros.js";
 
 type Mods = {
   index: KeyPress,
@@ -32,8 +27,7 @@ type Mods = {
   pinky: KeyPress,
 }
 
-const {ht, trans, none} = behaviors;
-const {LCTRL, LALT, LGUI, LSHFT, RCTRL, RALT, RGUI, RSHFT} = keys;
+const {ht, trans, none, mo, macro} = behaviors;
 
 const transThumb: Glove80ThumbLayout = [
   [trans, trans, trans],
@@ -45,13 +39,104 @@ type Glove80Layer = {
   layout: Glove80Layout
 }
 
-export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glove80Layer[] => {
+/**
+ * Creates bilateral home row mods layers for a given base layer.
+ * @param baseLayer - The base layer to add home row mods to
+ * @param mods - The modifier keys to use for each finger position (index, middle, ring, pinky)
+ */
+export const bilateralHomeRowMods = (baseLayer: Glove80Layer, mods: Mods): Glove80Layer[] => {
   const {name: baseLayerName, layout: baseLayout} = baseLayer;
 
   const leftHomeRow = baseLayout.left.finger[3];
   const rightHomeRow = baseLayout.right.finger[3];
   const [outerL, pinkyL, ringL, middleL, indexL, innerL] = leftHomeRow;
   const [innerR, indexR, middleR, ringR, pinkyR, outerR] = rightHomeRow;
+
+  // Create hold macros for each finger
+  const hrmLeftPinkyHold = macro('hrm_left_pinky_hold')
+    .press(mods.pinky)
+    .behavior(mo('LeftPinky'))
+    .pauseForRelease()
+    .release(mods.pinky)
+    .behavior(mo('LeftPinky'))
+    .build();
+
+  const hrmLeftRingHold = macro('hrm_left_ring_hold')
+    .press(mods.ring)
+    .behavior(mo('LeftRing'))
+    .pauseForRelease()
+    .release(mods.ring)
+    .behavior(mo('LeftRing'))
+    .build();
+
+  const hrmLeftMiddleHold = macro('hrm_left_middle_hold')
+    .press(mods.middle)
+    .behavior(mo('LeftMiddle'))
+    .pauseForRelease()
+    .release(mods.middle)
+    .behavior(mo('LeftMiddle'))
+    .build();
+
+  const hrmLeftIndexHold = macro('hrm_left_index_hold')
+    .press(mods.index)
+    .behavior(mo('LeftIndex'))
+    .pauseForRelease()
+    .release(mods.index)
+    .behavior(mo('LeftIndex'))
+    .build();
+
+  const hrmRightIndexHold = macro('hrm_right_index_hold')
+    .press(mods.index)
+    .behavior(mo('RightIndex'))
+    .pauseForRelease()
+    .release(mods.index)
+    .behavior(mo('RightIndex'))
+    .build();
+
+  const hrmRightMiddleHold = macro('hrm_right_middle_hold')
+    .press(mods.middle)
+    .behavior(mo('RightMiddle'))
+    .pauseForRelease()
+    .release(mods.middle)
+    .behavior(mo('RightMiddle'))
+    .build();
+
+  const hrmRightRingHold = macro('hrm_right_ring_hold')
+    .press(mods.ring)
+    .behavior(mo('RightRing'))
+    .pauseForRelease()
+    .release(mods.ring)
+    .behavior(mo('RightRing'))
+    .build();
+
+  const hrmRightPinkyHold = macro('hrm_right_pinky_hold')
+    .press(mods.pinky)
+    .behavior(mo('RightPinky'))
+    .pauseForRelease()
+    .release(mods.pinky)
+    .behavior(mo('RightPinky'))
+    .build();
+
+  // Create tap macros that release all modifiers and tap the key
+  const allModifiers = [mods.pinky, mods.ring, mods.middle, mods.index];
+  
+  const createTapMacro = (name: string, behavior: Behavior): MacroBehavior => {
+    const builder = allModifiers.reduce(
+      (acc, mod) => acc.release(mod),
+      macro(name)
+    );
+    return builder.behavior(behavior).build();
+  };
+
+  const hrmLeftPinkyTap = createTapMacro('hrm_left_pinky_tap', pinkyL);
+  const hrmLeftRingTap = createTapMacro('hrm_left_ring_tap', ringL);
+  const hrmLeftMiddleTap = createTapMacro('hrm_left_middle_tap', middleL);
+  const hrmLeftIndexTap = createTapMacro('hrm_left_index_tap', indexL);
+
+  const hrmRightIndexTap = createTapMacro('hrm_right_index_tap', indexR);
+  const hrmRightMiddleTap = createTapMacro('hrm_right_middle_tap', middleR);
+  const hrmRightRingTap = createTapMacro('hrm_right_ring_tap', ringR);
+  const hrmRightPinkyTap = createTapMacro('hrm_right_pinky_tap', pinkyR);
 
   const pinkyLHT = ht(hmlPinky, hrmLeftPinkyHold, hrmLeftPinkyTap);
   const ringLHT = ht(hmlRing, hrmLeftRingHold, hrmLeftRingTap);
@@ -102,9 +187,9 @@ export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glov
           baseLayout.left.finger[2],
           [
             outerL,
-            ht(hmlIndexPinky, LCTRL, hrmLeftPinkyTap),
-            ht(hmlIndexRing, LALT, hrmLeftRingTap),
-            ht(hmlIndexMiddle, LGUI, hrmLeftMiddleTap),
+            ht(hmlIndexPinky, mods.pinky, hrmLeftPinkyTap),
+            ht(hmlIndexRing, mods.ring, hrmLeftRingTap),
+            ht(hmlIndexMiddle, mods.middle, hrmLeftMiddleTap),
             none,
             innerL
           ],
@@ -138,10 +223,10 @@ export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glov
           baseLayout.left.finger[2],
           [
             outerL,
-            ht(hmlMiddlePinky, LCTRL, hrmLeftPinkyTap),
-            ht(hmlMiddleRing, LALT, hrmLeftRingTap),
+            ht(hmlMiddlePinky, mods.pinky, hrmLeftPinkyTap),
+            ht(hmlMiddleRing, mods.ring, hrmLeftRingTap),
             none,
-            ht(hmlMiddleIndex, LGUI, hrmLeftIndexTap),
+            ht(hmlMiddleIndex, mods.index, hrmLeftIndexTap),
             innerL
           ],
           baseLayout.left.finger[4],
@@ -173,10 +258,10 @@ export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glov
           baseLayout.left.finger[2],
           [
             outerL,
-            ht(hmlRingPinky, LSHFT, hrmLeftPinkyTap),
+            ht(hmlRingPinky, mods.pinky, hrmLeftPinkyTap),
             none,
-            ht(hmlRingMiddle, LALT, hrmLeftMiddleTap),
-            ht(hmlRingIndex, LGUI, hrmLeftIndexTap),
+            ht(hmlRingMiddle, mods.middle, hrmLeftMiddleTap),
+            ht(hmlRingIndex, mods.index, hrmLeftIndexTap),
             innerL
           ],
           baseLayout.left.finger[4],
@@ -210,9 +295,9 @@ export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glov
           [
             outerL,
             none,
-            ht(hmlPinkyRing, LCTRL, hrmLeftRingTap),
-            ht(hmlPinkyMiddle, LALT, hrmLeftMiddleTap),
-            ht(hmlPinkyIndex, LGUI, hrmLeftIndexTap),
+            ht(hmlPinkyRing, mods.ring, hrmLeftRingTap),
+            ht(hmlPinkyMiddle, mods.middle, hrmLeftMiddleTap),
+            ht(hmlPinkyIndex, mods.index, hrmLeftIndexTap),
             innerL
           ],
           baseLayout.left.finger[4],
@@ -256,9 +341,9 @@ export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glov
           [
             innerR,
             none,
-            ht(hmrIndexMiddle, RGUI, hrmRightMiddleTap),
-            ht(hmrIndexRing, RALT, hrmRightRingTap),
-            ht(hmrIndexPinky, RCTRL, hrmRightPinkyTap),
+            ht(hmrIndexMiddle, mods.middle, hrmRightMiddleTap),
+            ht(hmrIndexRing, mods.ring, hrmRightRingTap),
+            ht(hmrIndexPinky, mods.pinky, hrmRightPinkyTap),
             outerR
           ],
           baseLayout.right.finger[4],
@@ -290,10 +375,10 @@ export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glov
           baseLayout.right.finger[2],
           [
             innerR,
-            ht(hmrMiddleIndex, RGUI, hrmRightIndexTap),
+            ht(hmrMiddleIndex, mods.index, hrmRightIndexTap),
             none,
-            ht(hmrMiddleRing, RALT, hrmRightRingTap),
-            ht(hmrMiddlePinky, RCTRL, hrmRightPinkyTap),
+            ht(hmrMiddleRing, mods.ring, hrmRightRingTap),
+            ht(hmrMiddlePinky, mods.pinky, hrmRightPinkyTap),
             outerR
           ],
           baseLayout.right.finger[4],
@@ -326,10 +411,10 @@ export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glov
           baseLayout.right.finger[2],
           [
             innerR,
-            ht(hmrRingIndex, RGUI, hrmRightIndexTap),
-            ht(hmrRingMiddle, RALT, hrmRightMiddleTap),
+            ht(hmrRingIndex, mods.index, hrmRightIndexTap),
+            ht(hmrRingMiddle, mods.middle, hrmRightMiddleTap),
             none,
-            ht(hmrRingPinky, RSHFT, hrmRightPinkyTap),
+            ht(hmrRingPinky, mods.pinky, hrmRightPinkyTap),
             outerR
           ],
           baseLayout.right.finger[4],
@@ -361,9 +446,9 @@ export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glov
           baseLayout.right.finger[2],
           [
             innerR,
-            ht(hmrPinkyIndex, RGUI, hrmRightIndexTap),
-            ht(hmrPinkyMiddle, RALT, hrmRightMiddleTap),
-            ht(hmrPinkyRing, RCTRL, hrmRightRingTap),
+            ht(hmrPinkyIndex, mods.index, hrmRightIndexTap),
+            ht(hmrPinkyMiddle, mods.middle, hrmRightMiddleTap),
+            ht(hmrPinkyRing, mods.ring, hrmRightRingTap),
             none,
             outerR
           ],
@@ -387,5 +472,3 @@ export const bilateralHomeRowMods = (baseLayer: Glove80Layer, _mods: Mods): Glov
     rightPinkyLayer
   ];
 };
-
-export {bilateralHrmMacros};
